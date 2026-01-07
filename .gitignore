@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# API Keys (should never be committed)
+**/secrets.js
+groq_api_key.txt
+
+# Build outputs
+dist/
+build/
+*.zip
+
+# Logs
+*.log
+solver.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+.claude/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Chrome extension specific
+*.crx
+*.pem
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Backup files
+*.bak
+*.backup

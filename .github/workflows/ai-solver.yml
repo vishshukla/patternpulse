@@ -1,0 +1,44 @@
+name: AI Problem Solver
+
+# Run every 6 hours (4 times daily)
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours: 12am, 6am, 12pm, 6pm UTC
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  solve-problems:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install groq-sdk
+
+      - name: Run AI Problem Solver
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: node scripts/aiSolverCron.js
+
+      - name: Commit and push if changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add extension/data/aiProblemDatabase.js
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 AI Solver: Solved 15 more problems [skip ci]" && git push)
+
+      - name: Summary
+        run: |
+          echo "✅ AI Solver completed successfully"
+          PROBLEM_COUNT=$(node -e "console.log(require('./extension/data/aiProblemDatabase.js').AI_PROBLEM_DATABASE.length)")
+          echo "📊 Total problems in database: $PROBLEM_COUNT"
+          echo "🎯 Coverage: $(node -e "console.log(((require('./extension/data/aiProblemDatabase.js').AI_PROBLEM_DATABASE.length / 3053) * 100).toFixed(1))")%"

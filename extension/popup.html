@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PatternPulse</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 300px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #1a1a2e;
+      color: #e4e4e7;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .header {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #71717a;
+      padding-left: 42px; /* Align with title (32px logo + 10px gap) */
+    }
+
+    .beta-badge {
+      background: rgba(251, 191, 36, 0.15);
+      color: #fbbf24;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .streak-icon {
+      font-size: 16px;
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+
+    .patterns-section {
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pattern-list {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 8px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .pattern-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: background 0.15s ease;
+    }
+
+    .pattern-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .pattern-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: #e4e4e7;
+    }
+
+    .pattern-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6366f1;
+      background: rgba(99, 102, 241, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #4f46e5;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #71717a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #e4e4e7;
+    }
+
+    .btn-feedback {
+      width: 100%;
+      background: transparent;
+      color: #71717a;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      margin-bottom: 16px;
+      font-size: 11px;
+    }
+
+    .btn-feedback:hover {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #a1a1aa;
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .footer-beta {
+      font-size: 11px;
+      color: #a1a1aa;
+      margin-bottom: 4px;
+    }
+
+    .footer-brand {
+      font-size: 10px;
+      color: #52525b;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-state-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin: 0 auto 16px;
+    }
+
+    .empty-state-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #a1a1aa;
+    }
+
+    .empty-state-text strong {
+      color: #fff;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Pattern Strength Section */
+    .strength-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .strength-section-single {
+      margin-bottom: 16px;
+    }
+
+    .strength-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .strength-card.strongest {
+      border-color: rgba(34, 197, 94, 0.3);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .strength-card.weakest {
+      border-color: rgba(251, 191, 36, 0.3);
+      background: rgba(251, 191, 36, 0.08);
+    }
+
+    .strength-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .strength-icon {
+      font-size: 12px;
+    }
+
+    .strength-card.strongest .strength-icon {
+      color: #22c55e;
+    }
+
+    .strength-card.weakest .strength-icon {
+      color: #fbbf24;
+    }
+
+    .strength-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #71717a;
+    }
+
+    .strength-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .strength-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .strength-name {
+      font-weight: 500;
+      color: #e4e4e7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+    }
+
+    .strength-rate {
+      font-weight: 600;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .strength-card.strongest .strength-rate {
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.15);
+    }
+
+    .strength-card.weakest .strength-rate {
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.15);
+    }
+
+    /* Scrollbar styling */
+    .pattern-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .pattern-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .pattern-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+    }
+
+    /* Loading state */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-top">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Pattern grid icon -->
+            <circle cx="6" cy="6" r="2.5" fill="#6366f1"/>
+            <circle cx="18" cy="6" r="2.5" fill="#8b5cf6"/>
+            <circle cx="6" cy="18" r="2.5" fill="#8b5cf6"/>
+            <circle cx="18" cy="18" r="2.5" fill="#6366f1"/>
+            <circle cx="12" cy="12" r="2.5" fill="#a78bfa"/>
+            <!-- Connecting lines -->
+            <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+          </svg>
+        </div>
+        <h1>PatternPulse</h1>
+        <span class="beta-badge">BETA</span>
+      </div>
+      <p class="subtitle">Master LeetCode Patterns</p>
+    </div>
+
+    <div id="content">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

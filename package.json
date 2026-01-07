@@ -1,0 +1,37 @@
+{
+  "name": "patternpulse",
+  "version": "1.0.0",
+  "description": "AI-powered Chrome extension for LeetCode pattern recognition training",
+  "main": "scripts/aiSolverCron.js",
+  "scripts": {
+    "test": "node tests/unit.test.js",
+    "test:all": "node tests/testAISolver.js && node tests/unit.test.js",
+    "test:ai": "node tests/testAISolver.js",
+    "test:unit": "node tests/unit.test.js",
+    "solve": "node scripts/aiSolverCron.js",
+    "fetch": "node scripts/fetchFromLeetCode.js",
+    "lint": "echo 'No linter configured yet'",
+    "package": "cd extension && zip -r ../patternpulse.zip . -x '*.git*' -x 'node_modules/*'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vishshukla/patternpulse.git"
+  },
+  "keywords": [
+    "leetcode",
+    "chrome-extension",
+    "pattern-recognition",
+    "ai",
+    "coding-interview",
+    "algorithm-patterns"
+  ],
+  "author": "Vish Shukla",
+  "license": "MIT",
+  "dependencies": {
+    "groq-sdk": "^0.7.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

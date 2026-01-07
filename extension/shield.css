@@ -1,0 +1,779 @@
+/**
+ * PatternPulse Shield Styles
+ * CSS for hiding LeetCode metadata and showing quiz overlay
+ */
+
+/* ========================================
+   SHIELDS - Hide LeetCode Metadata
+   ======================================== */
+
+/* Blur shielded content - user can see something is there but not read it */
+.pattern-pulse-shield {
+  filter: blur(8px) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  opacity: 0.6 !important;
+  transition: filter 0.3s ease, opacity 0.3s ease !important;
+}
+
+/* When unlocked, remove blur smoothly */
+.pattern-pulse-shield.unlocked {
+  filter: none !important;
+  pointer-events: auto !important;
+  user-select: auto !important;
+  opacity: 1 !important;
+}
+
+/* ========================================
+   QUIZ SIDEBAR - Modern Dark UI
+   ======================================== */
+
+/* Tab on right edge - collapsed state */
+.pattern-pulse-sidebar {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 999999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* The clickable tab */
+.pattern-pulse-tab {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 80px;
+  background: #1a1a2e;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-right: none;
+  border-radius: 12px 0 0 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.pattern-pulse-tab:hover {
+  width: 42px;
+  background: #1e1e36;
+}
+
+.pattern-pulse-tab svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* The expanded panel */
+.pattern-pulse-panel {
+  position: absolute;
+  right: 44px; /* 36px tab + 8px gap */
+  top: 50%;
+  width: 280px;
+  max-height: 80vh;
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  overflow-y: auto;
+  color: #e4e4e7;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-50%) translateX(10px);
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+}
+
+/* Show panel on sidebar hover */
+.pattern-pulse-sidebar:hover .pattern-pulse-panel,
+.pattern-pulse-sidebar.pinned .pattern-pulse-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+  pointer-events: auto;
+}
+
+/* Connector between tab and panel */
+.pattern-pulse-sidebar::before {
+  content: '';
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 60px;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.pattern-pulse-sidebar:hover::before {
+  opacity: 1;
+  pointer-events: auto; /* Allows hover to continue between tab and panel */
+}
+
+/* When pinned, keep tab highlighted */
+.pattern-pulse-sidebar.pinned .pattern-pulse-tab {
+  background: #1e1e36;
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Subtle pulse animation to draw attention */
+.pattern-pulse-tab {
+  animation: tabPulse 2s ease-in-out infinite;
+}
+
+.pattern-pulse-sidebar:hover .pattern-pulse-tab {
+  animation: none;
+}
+
+@keyframes tabPulse {
+  0%, 100% {
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: -4px 0 25px rgba(99, 102, 241, 0.4);
+  }
+}
+
+.pattern-pulse-quiz {
+  padding: 20px;
+  height: 100%;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================
+   QUIZ HEADER
+   ======================================== */
+
+.quiz-header {
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.quiz-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quiz-logo {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quiz-logo svg {
+  width: 16px;
+  height: 16px;
+}
+
+.quiz-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+
+.quiz-subtitle {
+  font-size: 12px;
+  color: #71717a;
+  font-weight: 400;
+  margin-top: 4px;
+  padding-left: 38px; /* Align with title (28px logo + 10px gap) */
+}
+
+.close-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: transparent;
+  border: none;
+  color: #71717a;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* ========================================
+   NOT FOUND MESSAGE
+   ======================================== */
+
+.not-found-message {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.not-found-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.not-found-message p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+
+/* ========================================
+   COMPLETED STATE
+   ======================================== */
+
+.quiz-logo.completed {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.completed-info {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.completed-info h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.completed-pattern {
+  font-size: 13px;
+  color: #a1a1aa;
+  margin-bottom: 4px;
+}
+
+.completed-pattern strong {
+  color: #22c55e;
+}
+
+.completed-stats {
+  font-size: 11px;
+  color: #71717a;
+}
+
+.completed-stats.perfect {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.completed-actions {
+  margin-top: 12px;
+}
+
+.btn-reset {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #71717a;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-reset:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+/* ========================================
+   QUIZ PROBLEM
+   ======================================== */
+
+.quiz-problem {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.quiz-problem h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  color: #fff;
+}
+
+.quiz-hint {
+  font-size: 12px;
+  color: #71717a;
+}
+
+/* ========================================
+   PATTERN BUTTONS - Modern Grid
+   ======================================== */
+
+.quiz-patterns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.pattern-button {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 10px;
+  color: #e4e4e7;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.pattern-button:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #fff;
+}
+
+/* Scrollbar styling */
+.quiz-patterns::-webkit-scrollbar {
+  width: 4px;
+}
+
+.quiz-patterns::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quiz-patterns::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.pattern-button:active {
+  transform: scale(0.98);
+}
+
+/* ========================================
+   HINTS SECTION - Modern Style
+   ======================================== */
+
+.quiz-hints {
+  margin-bottom: 12px;
+}
+
+.hint-button {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: 10px;
+}
+
+.hint-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e4e4e7;
+}
+
+.hint-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hint-item {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+  animation: slideIn 0.2s ease;
+}
+
+.hint-number {
+  display: inline-block;
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.hint-item p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  color: #e4e4e7;
+}
+
+/* ========================================
+   FEEDBACK MESSAGES
+   ======================================== */
+
+.wrong-feedback {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  color: #f87171;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.feedback-dispute {
+  background: transparent;
+  border: none;
+  color: #71717a;
+  font-size: 10px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.feedback-dispute:hover {
+  color: #a1a1aa;
+}
+
+/* Feedback Form */
+.feedback-form {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #e4e4e7;
+}
+
+.feedback-close {
+  background: transparent;
+  border: none;
+  color: #71717a;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.feedback-close:hover {
+  color: #fff;
+}
+
+.feedback-text {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  color: #e4e4e7;
+  font-size: 12px;
+  font-family: inherit;
+  resize: none;
+  margin-bottom: 10px;
+}
+
+.feedback-text:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.feedback-text::placeholder {
+  color: #52525b;
+}
+
+.feedback-submit {
+  width: 100%;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.feedback-submit:hover {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.feedback-thanks {
+  text-align: center;
+  color: #22c55e;
+  font-size: 12px;
+  padding: 10px;
+}
+
+/* ========================================
+   SUCCESS STATE
+   ======================================== */
+
+.quiz-success {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.success-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #22c55e;
+  margin: 0 auto 16px;
+  animation: successPulse 0.4s ease;
+}
+
+.quiz-success h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.success-message {
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  color: #a1a1aa;
+}
+
+.success-message strong {
+  color: #22c55e;
+}
+
+.solution-insight {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.solution-insight p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #a1a1aa;
+  margin: 0;
+}
+
+.solution-insight h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.solution-insight p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+/* ========================================
+   BUTTONS - Modern Style
+   ======================================== */
+
+.continue-button {
+  width: 100%;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.continue-button:hover {
+  background: #4f46e5;
+}
+
+.continue-button:active {
+  transform: scale(0.98);
+}
+
+.skip-button {
+  width: 100%;
+  background: transparent;
+  color: #71717a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.skip-button:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #e4e4e7;
+}
+
+.quiz-footer {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.shake {
+  animation: shake 0.5s ease;
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+
+.pattern-pulse-quiz::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pattern-pulse-quiz::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.pattern-pulse-quiz::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.pattern-pulse-quiz::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 640px) {
+  .pattern-pulse-quiz {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .quiz-header h2 {
+    font-size: 24px;
+  }
+
+  .quiz-patterns {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+
+  .pattern-button {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+}
+
+/* ========================================
+   DARK MODE SUPPORT
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* Styles already optimized for dark mode */
+}
