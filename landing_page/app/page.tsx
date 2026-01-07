@@ -1,23 +1,14 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { BarChart3, Chrome, Sparkles, Target, Brain } from 'lucide-react'
+import { BarChart3, Chrome, Sparkles, Target, Brain, Download } from 'lucide-react'
 import { useState } from 'react'
 
-export default function Home() {
-  const [email, setEmail] = useState('')
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+// TODO: Replace with your actual Chrome Web Store URL after publishing
+const CHROME_STORE_URL = 'https://chrome.google.com/webstore/detail/patternpulse/YOUR_EXTENSION_ID'
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Email submitted:', email)
-    setIsSubmitted(true)
-    setTimeout(() => {
-      setIsSubmitted(false)
-      setEmail('')
-    }, 3000)
-  }
+export default function Home() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   const faqs = [
     {
@@ -57,10 +48,10 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-electric-purple/10 border border-electric-purple/30 rounded-full text-electric-purple text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-sm font-medium mb-6"
             >
               <Chrome className="w-4 h-4" />
-              <span>Free Chrome Extension</span>
+              <span>Available Now — Free</span>
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight">
@@ -74,12 +65,15 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
               <motion.a
-                href="#notify"
+                href={CHROME_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="px-8 py-4 bg-electric-purple hover:bg-primary-hover text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 text-base"
               >
-                Get Early Access
+                <Download className="w-5 h-5" />
+                Add to Chrome — It's Free
               </motion.a>
             </div>
 
@@ -319,8 +313,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Email Signup Section */}
-      <section id="notify" className="py-16 md:py-20 border-t border-slate-800 bg-gradient-to-b from-gray-900/30 to-transparent">
+      {/* Download CTA Section */}
+      <section className="py-16 md:py-20 border-t border-slate-800 bg-gradient-to-b from-gray-900/30 to-transparent">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -330,37 +324,27 @@ export default function Home() {
             className="max-w-md mx-auto text-center"
           >
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Get notified when we launch
+              Ready to level up?
             </h2>
 
             <p className="text-gray-500 mb-6">
-              One email. No spam.
+              Start training your pattern recognition today.
             </p>
 
-            <form onSubmit={handleSubmit} className="mb-3">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@email.com"
-                  required
-                  className="flex-1 px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-electric-purple transition-all text-sm"
-                />
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={isSubmitted}
-                  className="px-5 py-3 bg-electric-purple hover:bg-primary-hover text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm"
-                >
-                  {isSubmitted ? 'You\'re in!' : 'Notify me'}
-                </motion.button>
-              </div>
-            </form>
+            <motion.a
+              href={CHROME_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-electric-purple hover:bg-primary-hover text-white font-semibold rounded-xl transition-all"
+            >
+              <Chrome className="w-5 h-5" />
+              Add to Chrome — It's Free
+            </motion.a>
 
-            <p className="text-xs text-gray-600">
-              Unsubscribe anytime
+            <p className="text-xs text-gray-600 mt-4">
+              Works on any Chromium browser (Chrome, Edge, Brave, Arc)
             </p>
           </motion.div>
         </div>
@@ -369,9 +353,27 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 border-t border-slate-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-600 text-sm">
-            © {new Date().getFullYear()} PatternPulse
-          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-gray-600">
+            <p>© {new Date().getFullYear()} PatternPulse</p>
+            <span className="hidden sm:inline">•</span>
+            <a
+              href="https://github.com/vishshukla/patternpulse/blob/main/PRIVACY.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gray-400 transition-colors"
+            >
+              Privacy Policy
+            </a>
+            <span className="hidden sm:inline">•</span>
+            <a
+              href="https://github.com/vishshukla/patternpulse"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gray-400 transition-colors"
+            >
+              GitHub
+            </a>
+          </div>
         </div>
       </footer>
     </main>
