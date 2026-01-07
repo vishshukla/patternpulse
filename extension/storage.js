@@ -136,13 +136,15 @@ const storage = {
         }
       });
 
-      // Calculate streak (consecutive problems without hints, most recent first)
+      // Calculate streak (consecutive problems with perfect first guess - no hints AND no wrong attempts)
       const completedProblems = problems
         .filter(p => p.completed && p.timestamp)
         .sort((a, b) => b.timestamp - a.timestamp);
 
       for (const p of completedProblems) {
-        if ((p.hintsUsed || 0) === 0) {
+        const noHints = (p.hintsUsed || 0) === 0;
+        const noWrongAttempts = (p.wrongAttempts || 0) === 0;
+        if (noHints && noWrongAttempts) {
           stats.streak++;
         } else {
           break; // Streak broken

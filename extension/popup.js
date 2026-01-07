@@ -9,13 +9,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
+ * Get current problem status from storage
+ */
+async function getCurrentProblemStatus() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['currentProblemStatus'], (result) => {
+      resolve(result.currentProblemStatus || null);
+    });
+  });
+}
+
+/**
  * Load and display user statistics
  */
 async function loadStats() {
   try {
+    // Check if current page is a problem not in database
+    const problemStatus = await getCurrentProblemStatus();
+
     const stats = await storage.getStats();
     const strength = await storage.getPatternStrength();
-    displayStats(stats, strength);
+    displayStats(stats, strength, problemStatus);
   } catch (error) {
     console.error('[Popup] Error loading stats:', error);
     showError();
@@ -23,23 +37,55 @@ async function loadStats() {
 }
 
 /**
+ * Render "not in database" banner
+ */
+function renderNotInDatabaseBanner(slug) {
+  return `
+    <div class="not-in-db-banner">
+      <div class="not-in-db-icon">☕</div>
+      <div class="not-in-db-text">
+        This problem isn't on PatternPulse yet — we're working on it!
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Display statistics in popup
  */
-function displayStats(stats, strength) {
+function displayStats(stats, strength, problemStatus) {
   const content = document.getElementById('content');
 
+  // Check if current page is a problem not in database
+  const showNotInDbBanner = problemStatus && problemStatus.slug && !problemStatus.inDatabase;
+
   if (stats.total === 0) {
-    // Show empty state
+    // Show empty state (with not-in-db banner if applicable)
     content.innerHTML = `
+      ${showNotInDbBanner ? renderNotInDatabaseBanner(problemStatus.slug) : ''}
       <div class="empty-state">
         <div class="empty-state-icon">🎯</div>
         <div class="empty-state-text">
           <strong>No patterns tracked yet</strong>
-          Visit a LeetCode problem to start identifying patterns.
+          Start identifying patterns on LeetCode problems.
         </div>
       </div>
+
+      ${renderRandomButton(0)}
+
+      <button class="btn btn-feedback" id="feedback-btn">
+        💬 Send Feedback
+      </button>
+
       ${renderFooter()}
     `;
+
+    // Add event listeners for empty state
+    document.getElementById('feedback-btn').addEventListener('click', openFeedback);
+    const randomBtn = document.getElementById('random-btn');
+    if (randomBtn) {
+      randomBtn.addEventListener('click', openRandomProblem);
+    }
     return;
   }
 
@@ -54,6 +100,7 @@ function displayStats(stats, strength) {
     .slice(0, 10); // Top 10 patterns
 
   content.innerHTML = `
+    ${showNotInDbBanner ? renderNotInDatabaseBanner(problemStatus.slug) : ''}
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-value">${stats.completed}</div>
@@ -81,6 +128,8 @@ function displayStats(stats, strength) {
       </div>
     ` : ''}
 
+    ${renderRandomButton(stats.completed)}
+
     <div class="actions">
       <button class="btn btn-primary" id="export-btn">
         Export Data
@@ -101,6 +150,12 @@ function displayStats(stats, strength) {
   document.getElementById('export-btn').addEventListener('click', exportData);
   document.getElementById('reset-btn').addEventListener('click', resetData);
   document.getElementById('feedback-btn').addEventListener('click', openFeedback);
+
+  // Random button listener
+  const randomBtn = document.getElementById('random-btn');
+  if (randomBtn) {
+    randomBtn.addEventListener('click', openRandomProblem);
+  }
 }
 
 /**
@@ -151,6 +206,79 @@ function renderFooter() {
 }
 
 /**
+ * Get total problems in database
+ */
+function getTotalProblems() {
+  if (typeof PROBLEM_DATABASE === 'undefined') return 0;
+  return Object.keys(PROBLEM_DATABASE).length;
+}
+
+/**
+ * Render random problem button
+ */
+function renderRandomButton(completedCount) {
+  const totalProblems = getTotalProblems();
+  const remaining = totalProblems - completedCount;
+
+  if (totalProblems === 0) {
+    return ''; // Database not loaded
+  }
+
+  const allDone = remaining <= 0;
+
+  return `
+    <button class="btn btn-random" id="random-btn" ${allDone ? 'disabled' : ''}>
+      <span class="dice-icon">🎲</span>
+      ${allDone ? 'All Problems Completed!' : 'Random Problem'}
+    </button>
+    <div class="random-stats">
+      ${remaining} of ${totalProblems} problems remaining
+    </div>
+  `;
+}
+
+/**
+ * Open a random uncompleted problem
+ */
+async function openRandomProblem() {
+  try {
+    if (typeof PROBLEM_DATABASE === 'undefined') {
+      showNotification('Database not loaded', 'error');
+      return;
+    }
+
+    // Get all completed problem slugs
+    const allProgress = await storage.getAllProgress();
+    const completedSlugs = new Set(
+      Object.values(allProgress)
+        .filter(p => p.completed)
+        .map(p => p.slug)
+    );
+
+    // Get all problems from database that aren't completed
+    const uncompletedProblems = Object.values(PROBLEM_DATABASE)
+      .filter(p => !completedSlugs.has(p.slug));
+
+    if (uncompletedProblems.length === 0) {
+      showNotification('All problems completed! 🎉', 'success');
+      return;
+    }
+
+    // Pick a random one
+    const randomIndex = Math.floor(Math.random() * uncompletedProblems.length);
+    const randomProblem = uncompletedProblems[randomIndex];
+
+    // Open in new tab
+    const url = `https://leetcode.com/problems/${randomProblem.slug}/`;
+    chrome.tabs.create({ url });
+
+  } catch (error) {
+    console.error('[Popup] Error opening random problem:', error);
+    showNotification('Failed to open problem', 'error');
+  }
+}
+
+/**
  * Export user data
  */
 async function exportData() {
@@ -196,13 +324,10 @@ async function resetData() {
 }
 
 /**
- * Open feedback form
+ * Open feedback form (Google Form for general feedback)
  */
 function openFeedback() {
-  // Opens GitHub issues page for feedback
-  // TODO: Update this URL to your GitHub repo's issues page
-  const feedbackUrl = 'https://github.com/vishshukla/patternpulse/issues';
-  chrome.tabs.create({ url: feedbackUrl });
+  chrome.tabs.create({ url: CONFIG.feedbackFormUrl });
 }
 
 /**

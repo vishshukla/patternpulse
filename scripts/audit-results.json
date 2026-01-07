@@ -1,0 +1,21 @@
+{
+  "summary": {
+    "totalRequired": 256,
+    "missingProblems": 0,
+    "missingHints": 0,
+    "emptyHints": 0,
+    "missingPatternExplanations": 0,
+    "missingSolution": 0,
+    "duplicateHints": 0,
+    "duplicateExplanations": 0
+  },
+  "issues": {
+    "missingProblems": [],
+    "missingHints": [],
+    "emptyHints": [],
+    "missingPatternExplanations": [],
+    "missingSolution": [],
+    "duplicateHints": [],
+    "duplicateExplanations": []
+  }
+}

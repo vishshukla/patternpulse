@@ -124,21 +124,42 @@
   border-color: rgba(99, 102, 241, 0.5);
 }
 
-/* Subtle pulse animation to draw attention */
-.pattern-pulse-tab {
-  animation: tabPulse 2s ease-in-out infinite;
+/* Skipped state - muted tab color */
+.pattern-pulse-sidebar.skipped .pattern-pulse-tab {
+  background: #2a2a3e;
+  border-color: rgba(100, 100, 120, 0.3);
 }
 
-.pattern-pulse-sidebar:hover .pattern-pulse-tab {
-  animation: none;
+.pattern-pulse-sidebar.skipped .pattern-pulse-tab svg circle,
+.pattern-pulse-sidebar.skipped .pattern-pulse-tab svg path {
+  fill: #6b7280;
+  stroke: #6b7280;
 }
 
-@keyframes tabPulse {
-  0%, 100% {
+.pattern-pulse-sidebar.skipped .pattern-pulse-panel {
+  display: none;
+}
+
+/* Wrong answer flash - subtle red glow on tab */
+.pattern-pulse-tab.wrong-flash {
+  animation: wrongFlash 0.6s ease;
+}
+
+@keyframes wrongFlash {
+  0% {
+    background: #1a1a2e;
+    border-color: rgba(99, 102, 241, 0.3);
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
   }
-  50% {
-    box-shadow: -4px 0 25px rgba(99, 102, 241, 0.4);
+  30% {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: -4px 0 20px rgba(239, 68, 68, 0.3);
+  }
+  100% {
+    background: #1a1a2e;
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -352,8 +373,8 @@
 }
 
 .pattern-button {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 10px;
   padding: 12px 10px;
   color: #e4e4e7;
@@ -366,9 +387,10 @@
 }
 
 .pattern-button:hover {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.6);
   color: #fff;
+  transform: translateY(-1px);
 }
 
 /* Scrollbar styling */
@@ -399,11 +421,11 @@
 
 .hint-button {
   width: 100%;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
   border-radius: 10px;
   padding: 10px 12px;
-  color: #71717a;
+  color: #fbbf24;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -412,14 +434,17 @@
 }
 
 .hint-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #e4e4e7;
+  background: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fcd34d;
 }
 
 .hint-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #71717a;
 }
 
 .hints-list {
@@ -452,6 +477,23 @@
   line-height: 1.5;
   margin: 0;
   color: #e4e4e7;
+}
+
+/* No hints available message */
+.hint-item.no-hints {
+  background: rgba(100, 100, 120, 0.1);
+  border-color: rgba(100, 100, 120, 0.2);
+}
+
+.hint-item.no-hints p {
+  color: #a1a1aa;
+}
+
+.hint-item .hint-tip {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #71717a;
+  font-style: italic;
 }
 
 /* ========================================
@@ -564,6 +606,52 @@
   color: #22c55e;
   font-size: 12px;
   padding: 10px;
+}
+
+/* Inline Feedback Form (inside wrong-feedback) */
+.feedback-form-inline {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.feedback-form-inline .feedback-text {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 10px;
+  color: #e4e4e7;
+  font-size: 12px;
+  font-family: inherit;
+  resize: none;
+  margin-bottom: 8px;
+}
+
+.feedback-form-inline .feedback-text:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.feedback-form-inline .feedback-text::placeholder {
+  color: #71717a;
+}
+
+.feedback-submit-github {
+  width: 100%;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.feedback-submit-github:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
 }
 
 /* ========================================
@@ -699,12 +787,6 @@
   }
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
-}
-
 @keyframes successPulse {
   0% {
     transform: scale(0);
@@ -717,10 +799,6 @@
     transform: scale(1);
     opacity: 1;
   }
-}
-
-.shake {
-  animation: shake 0.5s ease;
 }
 
 /* ========================================
@@ -768,6 +846,105 @@
     padding: 12px 8px;
     font-size: 13px;
   }
+}
+
+/* ========================================
+   TITLE BADGE - Inline badge next to problem title
+   ======================================== */
+
+.pattern-pulse-title-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 10px;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.pattern-pulse-title-badge:hover {
+  transform: scale(1.1);
+}
+
+.pattern-pulse-title-badge > svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Tooltip on hover - positioned to the right */
+.pattern-pulse-tooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1a1a2e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #e5e5e5;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 999999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.pattern-pulse-tooltip strong {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.pattern-pulse-title-badge:hover .pattern-pulse-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Arrow pointing left */
+.pattern-pulse-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(34, 197, 94, 0.3);
+}
+
+.pattern-pulse-tooltip::after {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: #1a1a2e;
+}
+
+/* ========================================
+   QUIZ EXPLAINER - Why things are blurred
+   ======================================== */
+
+.quiz-explainer {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+
+.quiz-explainer p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #a5b4fc;
 }
 
 /* ========================================

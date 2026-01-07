@@ -4,7 +4,21 @@
   "description": "Chrome extension for LeetCode pattern recognition training",
   "private": true,
   "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "package": "cd extension && zip -r ../patternpulse.zip . -x '*.git*' -x 'node_modules/*' -x '.DS_Store'"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"],
+    "collectCoverageFrom": [
+      "extension/**/*.js",
+      "!extension/data/**"
+    ]
   },
   "keywords": [
     "leetcode",

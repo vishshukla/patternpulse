@@ -15,38 +15,40 @@
   const style = document.createElement('style');
   style.id = 'pattern-pulse-preemptive';
   style.textContent = `
-    /* Pre-emptive shields - hide potential spoilers before full JS runs */
-    /* These are removed when we determine user has completed the problem */
-    html:not([data-pp-ready]) a[href*="/tag/"],
-    html:not([data-pp-ready]) a[href*="/company/"] {
+    /* ========================================
+       PREEMPTIVE SHIELDS - Injected at document_start
+       Hide spoilers BEFORE content renders
+       IMPORTANT: Never blur PatternPulse's own elements!
+       ======================================== */
+
+    /* Pre-blur tag and company links (but not in our UI) */
+    html:not([data-pp-ready]) a[href*="/tag/"]:not(.pattern-pulse-sidebar *),
+    html:not([data-pp-ready]) a[href*="/company/"]:not(.pattern-pulse-sidebar *) {
       filter: blur(8px) !important;
       pointer-events: none !important;
     }
 
-    /* Hide tabs that contain spoilers */
-    html:not([data-pp-ready]) button:not(:first-child),
-    html:not([data-pp-ready]) div[role="tab"]:not(:first-child) {
+    /* Pre-blur LeetCode's tab bar (Editorial, Solutions, etc) */
+    html:not([data-pp-ready]) [data-cy="tabs-navigation"] > *:not(:first-child),
+    html:not([data-pp-ready]) [role="tablist"]:not(.pattern-pulse-sidebar *) > *:not(:first-child) {
       filter: blur(6px) !important;
+      pointer-events: none !important;
     }
   `;
 
-  // Inject into head or document element (whichever exists at document_start)
-  const target = document.head || document.documentElement;
-  if (target) {
-    target.appendChild(style);
-  } else {
-    // Fallback: wait for head to exist
-    const observer = new MutationObserver(() => {
-      if (document.head) {
-        document.head.appendChild(style);
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.documentElement, { childList: true });
-  }
+  // Inject into documentElement immediately (exists even at document_start)
+  document.documentElement.appendChild(style);
+
+  // Failsafe: reveal page after 3 seconds if init hasn't run
+  setTimeout(() => {
+    if (!document.documentElement.hasAttribute('data-pp-ready')) {
+      console.log('[PatternPulse] Failsafe: revealing page');
+      document.documentElement.setAttribute('data-pp-ready', 'true');
+    }
+  }, 3000);
 })();
 
-// 15 Core Patterns
+// Core Patterns - all patterns that can appear in the quiz
 const CORE_PATTERNS = [
   'Hash Map',
   'Two Pointers',
@@ -62,8 +64,22 @@ const CORE_PATTERNS = [
   'Heap',
   'Trie',
   'Union Find',
-  'Topological Sort'
+  'Topological Sort',
+  'Math',
+  'Bit Manipulation',
+  'Graph'
 ];
+
+// Map variant pattern names to canonical names
+const PATTERN_ALIASES = {
+  'Heap/Priority Queue': 'Heap',
+  'Tree Traversal': 'DFS',
+  'Queue': 'BFS',
+  'Sorting': 'Two Pointers',
+  'Prefix Sum': 'Hash Map',
+  'Prefix/Suffix': 'Hash Map',
+  'Design': 'Hash Map'
+};
 
 // State
 let currentProblem = null;
@@ -83,12 +99,17 @@ async function init() {
     const slug = extractSlugFromURL();
     if (!slug) {
       console.log('[PatternPulse] Not a problem page');
+      // Reveal page content (no shields needed)
+      document.documentElement.setAttribute('data-pp-ready', 'true');
+      // Clear problem status - not on a problem page
+      saveCurrentProblemStatus({ slug: null, inDatabase: false });
       return;
     }
 
     // Skip if we're already showing for this slug
     if (currentSlug === slug && document.querySelector('.pattern-pulse-sidebar')) {
       console.log('[PatternPulse] Already initialized for this problem');
+      document.documentElement.setAttribute('data-pp-ready', 'true');
       return;
     }
 
@@ -116,6 +137,13 @@ async function init() {
     if (currentProgress && currentProgress.completed) {
       // Already solved - show completed state (no shields)
       console.log('[PatternPulse] Problem already completed');
+      // Save status for popup
+      saveCurrentProblemStatus({
+        slug: currentSlug,
+        inDatabase: true,
+        completed: true,
+        pattern: currentProgress.pattern
+      });
       showCompletedState();
       return;
     }
@@ -123,14 +151,22 @@ async function init() {
     // Not solved yet - apply shields and show quiz
     shieldsActive = true;
     applyShields();
+    showQuiz();
 
-    // Show quiz after a short delay to let page load
-    setTimeout(() => {
-      showQuiz();
-    }, 500);
+    // Save status for popup
+    saveCurrentProblemStatus({
+      slug: currentSlug,
+      inDatabase: true,
+      completed: false
+    });
+
+    // Mark page as ready (reveals content with shields in place)
+    document.documentElement.setAttribute('data-pp-ready', 'true');
 
   } catch (error) {
     console.error('[PatternPulse] Initialization error:', error);
+    // Reveal page on error (don't leave it hidden)
+    document.documentElement.setAttribute('data-pp-ready', 'true');
   }
 }
 
@@ -235,58 +271,35 @@ function applyShields() {
 }
 
 /**
- * Show "not in database" message
+ * Save current problem status to storage (for popup to read)
+ */
+async function saveCurrentProblemStatus(status) {
+  try {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      await chrome.storage.local.set({ currentProblemStatus: status });
+    }
+  } catch (error) {
+    console.error('[PatternPulse] Error saving problem status:', error);
+  }
+}
+
+/**
+ * Handle problem not in database - no UI shown, just save status for popup
  */
 function showNotInDatabase() {
   // Mark page as ready (removes preemptive shields) - problem not in DB, so don't blur
   document.documentElement.setAttribute('data-pp-ready', 'true');
 
-  const sidebar = document.createElement('div');
-  sidebar.className = 'pattern-pulse-sidebar';
-  sidebar.innerHTML = `
-    <div class="pattern-pulse-tab">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="2.5" fill="#6366f1"/>
-        <circle cx="18" cy="6" r="2.5" fill="#8b5cf6"/>
-        <circle cx="6" cy="18" r="2.5" fill="#8b5cf6"/>
-        <circle cx="18" cy="18" r="2.5" fill="#6366f1"/>
-        <circle cx="12" cy="12" r="2.5" fill="#a78bfa"/>
-        <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-      </svg>
-    </div>
-    <div class="pattern-pulse-panel">
-      <div class="pattern-pulse-quiz">
-        <div class="quiz-header">
-          <div class="quiz-header-brand">
-            <div class="quiz-logo">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="6" cy="6" r="2.5" fill="#6366f1"/>
-                <circle cx="18" cy="6" r="2.5" fill="#8b5cf6"/>
-                <circle cx="6" cy="18" r="2.5" fill="#8b5cf6"/>
-                <circle cx="18" cy="18" r="2.5" fill="#6366f1"/>
-                <circle cx="12" cy="12" r="2.5" fill="#a78bfa"/>
-                <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-              </svg>
-            </div>
-            <h2>PatternPulse</h2>
-          </div>
-        </div>
-        <div class="not-found-message">
-          <div class="not-found-icon">☕</div>
-          <p>This question isn't on PatternPulse yet — we're working on it!</p>
-        </div>
-      </div>
-    </div>
-  `;
+  // Make absolutely sure no shields remain from previous problem
+  document.querySelectorAll('.pattern-pulse-shield').forEach(el => {
+    el.classList.remove('pattern-pulse-shield', 'unlocked');
+  });
 
-  document.body.appendChild(sidebar);
-
-  // Auto-remove after 5 seconds
-  setTimeout(() => {
-    if (sidebar.parentNode) {
-      sidebar.remove();
-    }
-  }, 5000);
+  // Save status for popup - no sidebar/badge shown for problems not in DB
+  saveCurrentProblemStatus({
+    slug: currentSlug,
+    inDatabase: false
+  });
 }
 
 /**
@@ -296,65 +309,68 @@ function showCompletedState() {
   // Mark page as ready (removes preemptive shields)
   document.documentElement.setAttribute('data-pp-ready', 'true');
 
-  // Remove any existing sidebar first
+  // Remove any existing sidebar/badge first
   const existing = document.querySelector('.pattern-pulse-sidebar');
   if (existing) existing.remove();
+  const existingBadge = document.querySelector('.pattern-pulse-title-badge');
+  if (existingBadge) existingBadge.remove();
 
-  const sidebar = document.createElement('div');
-  sidebar.className = 'pattern-pulse-sidebar';
-  sidebar.innerHTML = `
-    <div class="pattern-pulse-tab" title="PatternPulse - Already solved!">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="2.5" fill="#22c55e"/>
-        <circle cx="18" cy="6" r="2.5" fill="#22c55e"/>
-        <circle cx="6" cy="18" r="2.5" fill="#22c55e"/>
-        <circle cx="18" cy="18" r="2.5" fill="#22c55e"/>
-        <circle cx="12" cy="12" r="2.5" fill="#22c55e"/>
-        <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-      </svg>
-    </div>
-    <div class="pattern-pulse-panel">
-      <div class="pattern-pulse-quiz">
-        <div class="quiz-header">
-          <div class="quiz-header-brand">
-            <div class="quiz-logo completed">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 13l4 4L19 7" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <h2>Solved!</h2>
-          </div>
-        </div>
-        <div class="completed-info">
-          <h3>${currentProblem.title}</h3>
-          <p class="completed-pattern">Pattern: <strong>${currentProgress.pattern}</strong></p>
-          ${currentProgress.hintsUsed > 0 || currentProgress.wrongAttempts > 0 ?
-            `<p class="completed-stats">Hints: ${currentProgress.hintsUsed || 0} | Wrong tries: ${currentProgress.wrongAttempts || 0}</p>` :
-            `<p class="completed-stats perfect">Perfect solve!</p>`
-          }
-        </div>
-        <div class="completed-actions">
-          <button class="btn-reset" id="reset-progress">
-            Reset & Try Again
-          </button>
-        </div>
-      </div>
-    </div>
+  // Make absolutely sure no shields remain
+  document.querySelectorAll('.pattern-pulse-shield').forEach(el => {
+    el.classList.remove('pattern-pulse-shield', 'unlocked');
+  });
+
+  // Try to inject badge next to problem title
+  injectTitleBadge();
+}
+
+/**
+ * Inject a small badge next to the problem title
+ */
+function injectTitleBadge() {
+  // Find LeetCode's problem title - try multiple selectors
+  const titleSelectors = [
+    '[data-cy="question-title"]',
+    '.text-title-large',
+    'div[class*="text-title"]',
+    'h4[class*="text-"]'
+  ];
+
+  let titleElement = null;
+  for (const selector of titleSelectors) {
+    titleElement = document.querySelector(selector);
+    if (titleElement) break;
+  }
+
+  if (!titleElement) {
+    // Fallback: try again after a short delay (title might not be rendered yet)
+    setTimeout(injectTitleBadge, 500);
+    return;
+  }
+
+  // Don't add duplicate badge
+  if (titleElement.querySelector('.pattern-pulse-title-badge')) return;
+
+  // Create badge with PatternPulse logo in green
+  const badge = document.createElement('span');
+  badge.className = 'pattern-pulse-title-badge';
+  badge.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="6" r="2.5" fill="#22c55e"/>
+      <circle cx="18" cy="6" r="2.5" fill="#16a34a"/>
+      <circle cx="6" cy="18" r="2.5" fill="#16a34a"/>
+      <circle cx="18" cy="18" r="2.5" fill="#22c55e"/>
+      <circle cx="12" cy="12" r="2.5" fill="#4ade80"/>
+      <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    </svg>
+    <span class="pattern-pulse-tooltip">
+      Seen<br>
+      <strong>Pattern: ${currentProgress.pattern}</strong>
+    </span>
   `;
 
-  document.body.appendChild(sidebar);
-
-  // Reset button handler
-  sidebar.querySelector('#reset-progress').addEventListener('click', async () => {
-    await storage.saveProgress(currentProblem.slug, null);
-    currentProgress = null;
-    sidebar.remove();
-
-    // Reinitialize as unsolved
-    shieldsActive = true;
-    applyShields();
-    showQuiz();
-  });
+  // Append after the title text (right side)
+  titleElement.appendChild(badge);
 }
 
 /**
@@ -405,12 +421,15 @@ function createQuizSidebar() {
             </div>
             <h2>PatternPulse</h2>
           </div>
-          <p class="quiz-subtitle">Identify the pattern</p>
+        </div>
+
+        <div class="quiz-explainer">
+          <p>🔒 Hints, tags & solutions are blurred until you identify the pattern — just like in a real interview.</p>
         </div>
 
         <div class="quiz-problem">
           <h3>${currentProblem.title}</h3>
-          <p class="quiz-hint">What algorithmic pattern would you use?</p>
+          <p class="quiz-hint">What pattern would you use?</p>
         </div>
 
         <div class="quiz-patterns">
@@ -449,13 +468,21 @@ function createQuizSidebar() {
 }
 
 /**
+ * Normalize pattern name using aliases
+ */
+function normalizePattern(pattern) {
+  return PATTERN_ALIASES[pattern] || pattern;
+}
+
+/**
  * Handle pattern selection
  */
 async function handlePatternSelection(selectedPattern) {
-  const primaryPattern = currentProblem.primaryPattern;
-  const acceptablePatterns = currentProblem.acceptablePatterns ||
-                            currentProblem.alternativePatterns ||
-                            [];
+  // Normalize the primary pattern (in case database uses variant names)
+  const primaryPattern = normalizePattern(currentProblem.primaryPattern);
+  const acceptablePatterns = (currentProblem.acceptablePatterns ||
+                              currentProblem.alternativePatterns ||
+                              []).map(normalizePattern);
 
   const isCorrect = selectedPattern === primaryPattern ||
                     acceptablePatterns.includes(selectedPattern);
@@ -539,10 +566,13 @@ function handleWrongAnswer(selectedPattern) {
   wrongAttempts++;
 
   const quiz = document.querySelector('.pattern-pulse-quiz');
+  const tab = document.querySelector('.pattern-pulse-tab');
 
-  // Add shake animation to quiz
-  quiz.classList.add('shake');
-  setTimeout(() => quiz.classList.remove('shake'), 500);
+  // Flash the tab red briefly for subtle feedback
+  if (tab) {
+    tab.classList.add('wrong-flash');
+    setTimeout(() => tab.classList.remove('wrong-flash'), 600);
+  }
 
   // Remove existing feedback
   const existingFeedback = quiz.querySelector('.wrong-feedback');
@@ -563,66 +593,70 @@ function handleWrongAnswer(selectedPattern) {
     patternsSection.insertAdjacentElement('beforebegin', feedback);
   }
 
-  // Handle dispute click
-  feedback.querySelector('.feedback-dispute').addEventListener('click', () => {
-    openFeedback(selectedPattern);
-  });
-
-  setTimeout(() => {
-    if (feedback.parentNode) feedback.remove();
+  // Auto-remove after 5 seconds (unless user interacts)
+  let autoRemoveTimeout = setTimeout(() => {
+    if (feedback.parentNode && !feedback.querySelector('.feedback-form-inline')) {
+      feedback.remove();
+    }
   }, 5000);
+
+  // Handle dispute click - show form right under the feedback
+  feedback.querySelector('.feedback-dispute').addEventListener('click', () => {
+    clearTimeout(autoRemoveTimeout); // Prevent auto-remove
+    openFeedbackInline(feedback, selectedPattern);
+  });
 }
 
 /**
- * Open feedback for disputing an answer
+ * Open feedback form inline (right under the disagree button)
  */
-function openFeedback(selectedPattern) {
+function openFeedbackInline(feedbackElement, selectedPattern) {
+  const problemId = currentProblem?.leetcodeId || 'Unknown';
   const problemTitle = currentProblem?.title || 'Unknown';
   const problemSlug = currentProblem?.slug || '';
   const expectedPattern = currentProblem?.primaryPattern || 'Unknown';
 
-  // Create a simple feedback form in the quiz
-  const quiz = document.querySelector('.pattern-pulse-quiz');
-  const existingForm = quiz.querySelector('.feedback-form');
-  if (existingForm) return; // Already showing
+  // Check if form already exists
+  const existingForm = feedbackElement.querySelector('.feedback-form-inline');
+  if (existingForm) return;
 
+  // Create inline form right under the disagree message
   const form = document.createElement('div');
-  form.className = 'feedback-form';
+  form.className = 'feedback-form-inline';
   form.innerHTML = `
-    <div class="feedback-header">
-      <span>Think ${selectedPattern} works here?</span>
-      <button class="feedback-close">×</button>
-    </div>
-    <textarea class="feedback-text" placeholder="Explain why ${selectedPattern} is optimal for this problem..." rows="3"></textarea>
-    <button class="feedback-submit">Send Feedback</button>
+    <textarea class="feedback-text" placeholder="Why do you think ${selectedPattern} is the right pattern?" rows="2"></textarea>
+    <button class="feedback-submit-github">Submit Feedback on GitHub</button>
   `;
 
-  quiz.appendChild(form);
+  feedbackElement.appendChild(form);
 
-  // Close button
-  form.querySelector('.feedback-close').addEventListener('click', () => {
-    form.remove();
-  });
-
-  // Submit button
-  form.querySelector('.feedback-submit').addEventListener('click', () => {
+  // GitHub issue submission
+  form.querySelector('.feedback-submit-github').addEventListener('click', () => {
     const text = form.querySelector('.feedback-text').value.trim();
-    if (!text) {
-      alert('Please explain your reasoning');
-      return;
-    }
 
-    // For now, copy to clipboard and show confirmation
-    const feedbackData = `Problem: ${problemTitle} (${problemSlug})\nExpected: ${expectedPattern}\nSuggested: ${selectedPattern}\nReason: ${text}`;
+    const issueTitle = encodeURIComponent(`Problem #${problemId}: Pattern disagreement - ${selectedPattern} vs ${expectedPattern}`);
+    const issueBody = encodeURIComponent(
+`## Problem
+- **Problem #${problemId}**: ${problemTitle}
+- **LeetCode URL**: https://leetcode.com/problems/${problemSlug}/
 
-    navigator.clipboard.writeText(feedbackData).then(() => {
-      form.innerHTML = `<div class="feedback-thanks">Thanks! Feedback copied to clipboard.</div>`;
-      setTimeout(() => form.remove(), 2000);
-    }).catch(() => {
-      // Fallback - just show thanks
-      form.innerHTML = `<div class="feedback-thanks">Thanks for the feedback!</div>`;
-      setTimeout(() => form.remove(), 2000);
-    });
+## Pattern Disagreement
+- **Current pattern**: ${expectedPattern}
+- **Suggested pattern**: ${selectedPattern}
+
+## Reasoning
+${text || '(No explanation provided)'}
+
+---
+*Submitted via PatternPulse extension*`
+    );
+
+    const githubUrl = `https://github.com/vishshukla/patternpulse/issues/new?title=${issueTitle}&body=${issueBody}&labels=pattern-feedback`;
+    window.open(githubUrl, '_blank');
+
+    // Show thanks
+    form.innerHTML = `<div class="feedback-thanks">Thanks! Redirecting to GitHub...</div>`;
+    setTimeout(() => feedbackElement.remove(), 2000);
   });
 }
 
@@ -631,13 +665,27 @@ function openFeedback(selectedPattern) {
  */
 function showHint() {
   const hints = currentProblem.hints || [];
+  const hintsList = document.getElementById('hints-list');
+  const hintButton = document.getElementById('hint-button');
 
-  if (hintsGiven >= hints.length) {
-    alert('No more hints available!');
+  // No hints available for this problem
+  if (hints.length === 0) {
+    const noHintsMsg = document.createElement('div');
+    noHintsMsg.className = 'hint-item no-hints';
+    noHintsMsg.innerHTML = `
+      <p>Hints not available for this problem yet.</p>
+      <p class="hint-tip">Try thinking about: What data structure would help? What's the time complexity you're aiming for?</p>
+    `;
+    hintsList.appendChild(noHintsMsg);
+    hintButton.textContent = 'No hints available';
+    hintButton.disabled = true;
     return;
   }
 
-  const hintsList = document.getElementById('hints-list');
+  if (hintsGiven >= hints.length) {
+    return;
+  }
+
   const hintElement = document.createElement('div');
   hintElement.className = 'hint-item';
   hintElement.innerHTML = `
@@ -649,7 +697,6 @@ function showHint() {
   hintsGiven++;
 
   // Update hint button
-  const hintButton = document.getElementById('hint-button');
   if (hintsGiven >= hints.length) {
     hintButton.textContent = 'No more hints';
     hintButton.disabled = true;
@@ -659,25 +706,25 @@ function showHint() {
 }
 
 /**
- * Skip quiz and go straight to problem
+ * Skip quiz and go straight to problem (no confirmation)
+ * Tab stays visible but becomes muted/inactive
  */
 async function skipQuiz() {
-  const confirmed = confirm(
-    'Are you sure you want to skip?\n\n' +
-    'You can still identify the pattern after solving the problem.'
-  );
-
-  if (!confirmed) return;
-
   // Save as skipped
   await storage.saveProgress(currentProblem.slug, {
     skipped: true,
     timestamp: Date.now()
   });
 
-  // Remove shields and sidebar
+  // Remove shields
   removeShields();
-  closeSidebar();
+
+  // Change sidebar to skipped state (muted, non-expandable)
+  const sidebar = document.querySelector('.pattern-pulse-sidebar');
+  if (sidebar) {
+    sidebar.classList.add('skipped');
+    sidebar.querySelector('.pattern-pulse-tab').title = 'PatternPulse - Skipped';
+  }
 }
 
 /**
@@ -697,13 +744,13 @@ function removeShields() {
   });
 }
 
-// Initialize when DOM is ready - with delay to let LeetCode's SPA settle
+// Initialize when DOM is ready
 function startExtension() {
   // Set initial slug to prevent checkUrlChange from reinitializing immediately
   lastProblemSlug = extractSlugFromURL();
 
-  // Delay init slightly to let LeetCode's dynamic content load
-  setTimeout(init, 800);
+  // Small delay to let LeetCode's initial render complete
+  setTimeout(init, 100);
 }
 
 if (document.readyState === 'loading') {
@@ -762,8 +809,9 @@ function checkUrlChange() {
     console.log('[PatternPulse] Problem changed:', lastProblemSlug, '->', newSlug);
     lastProblemSlug = newSlug;
 
-    // Reset preemptive shields for new problem (remove data-pp-ready)
-    document.documentElement.removeAttribute('data-pp-ready');
+    // Keep data-pp-ready SET during navigation to prevent flash of blurred content
+    // It will be managed by init() based on the new problem's state
+    document.documentElement.setAttribute('data-pp-ready', 'true');
 
     // Reset state for new problem
     currentProblem = null;
@@ -773,17 +821,34 @@ function checkUrlChange() {
     hintsGiven = 0;
     wrongAttempts = 0;
     shieldsActive = false;
+    lastShieldCount = 0;
+
+    // Clear any pending shield re-application
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
 
     // Close any existing sidebar
     closeSidebar();
 
-    // Remove any existing shields
+    // Remove any existing title badge
+    const existingBadge = document.querySelector('.pattern-pulse-title-badge');
+    if (existingBadge) existingBadge.remove();
+
+    // Remove any existing shields (do it twice to catch any stragglers)
     document.querySelectorAll('.pattern-pulse-shield').forEach(el => {
       el.classList.remove('pattern-pulse-shield', 'unlocked');
     });
 
     // Reinitialize after a short delay to let the page load
-    setTimeout(init, 500);
+    setTimeout(() => {
+      // Remove shields again in case LeetCode re-rendered elements
+      document.querySelectorAll('.pattern-pulse-shield').forEach(el => {
+        el.classList.remove('pattern-pulse-shield', 'unlocked');
+      });
+      init();
+    }, 100);
   }
 }
 
