@@ -1,21 +1,23 @@
 # PatternPulse
 
-> Chrome extension for mastering LeetCode patterns
+> Free Chrome extension for mastering LeetCode patterns
 
-Train your pattern recognition skills by identifying algorithmic patterns **before** seeing hints, tags, and difficulty. Track your progress and improve for coding interviews.
+Train your pattern recognition skills by identifying algorithmic patterns **before** seeing hints, tags, and solutions. Track your progress and improve for coding interviews — completely free, no account required.
 
 ## Features
 
-- **Pattern Quiz** - Identify the pattern before solving
-- **Smart Shields** - Blur tags, difficulty, hints until you guess correctly
-- **Progress Tracking** - Track accuracy and identify weak areas
-- **Streak Counter** - Build momentum with consecutive perfect solves
-- **15 Core Patterns** - Hash Map, Two Pointers, Sliding Window, Binary Search, DP, Greedy, Backtracking, DFS, BFS, Stack, Linked List, Heap, Trie, Union Find, Topological Sort
+- **Pattern Quiz** - Identify the pattern before solving (256 curated problems from NeetCode 150 + LeetCode 75)
+- **Smart Shields** - Blur tags, hints, and solutions until you guess correctly
+- **Progressive Hints** - Get hints if you're stuck without giving up
+- **Progress Tracking** - Track completed problems and pattern mastery
+- **Streak Counter** - Build momentum with consecutive first-try solves
+- **Random Problem** - Jump to a random unsolved problem to keep practicing
+- **18 Core Patterns** - Hash Map, Two Pointers, Sliding Window, Binary Search, DP, Greedy, Backtracking, DFS, BFS, Stack, Linked List, Heap, Trie, Union Find, Topological Sort, Math, Bit Manipulation, Graph
 
 ## Installation
 
 ### From Chrome Web Store
-Coming soon!
+[Install PatternPulse](https://chrome.google.com/webstore/detail/patternpulse) — Free!
 
 ### Load Unpacked (Developer Mode)
 1. Clone this repository
@@ -26,10 +28,11 @@ Coming soon!
 
 ## Usage
 
-1. Visit any LeetCode problem
-2. Hover over the PatternPulse tab on the right
+1. Visit any LeetCode problem in our database
+2. Hover over the PatternPulse tab on the right edge
 3. Select the pattern you think applies
-4. Get it right to unlock the problem metadata!
+4. Use hints if needed, or skip to practice later
+5. Get it right to unlock the problem metadata!
 
 ## Project Structure
 
