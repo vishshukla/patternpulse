@@ -6,6 +6,46 @@
  * 3. Track user progress with pattern identification
  */
 
+// IMMEDIATELY inject preemptive shields (runs at document_start, before DOM loads)
+// This prevents flash of unshielded content
+(function injectPreemptiveShields() {
+  // Only run on problem pages
+  if (!window.location.pathname.includes('/problems/')) return;
+
+  const style = document.createElement('style');
+  style.id = 'pattern-pulse-preemptive';
+  style.textContent = `
+    /* Pre-emptive shields - hide potential spoilers before full JS runs */
+    /* These are removed when we determine user has completed the problem */
+    html:not([data-pp-ready]) a[href*="/tag/"],
+    html:not([data-pp-ready]) a[href*="/company/"] {
+      filter: blur(8px) !important;
+      pointer-events: none !important;
+    }
+
+    /* Hide tabs that contain spoilers */
+    html:not([data-pp-ready]) button:not(:first-child),
+    html:not([data-pp-ready]) div[role="tab"]:not(:first-child) {
+      filter: blur(6px) !important;
+    }
+  `;
+
+  // Inject into head or document element (whichever exists at document_start)
+  const target = document.head || document.documentElement;
+  if (target) {
+    target.appendChild(style);
+  } else {
+    // Fallback: wait for head to exist
+    const observer = new MutationObserver(() => {
+      if (document.head) {
+        document.head.appendChild(style);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.documentElement, { childList: true });
+  }
+})();
+
 // 15 Core Patterns
 const CORE_PATTERNS = [
   'Hash Map',
@@ -198,6 +238,9 @@ function applyShields() {
  * Show "not in database" message
  */
 function showNotInDatabase() {
+  // Mark page as ready (removes preemptive shields) - problem not in DB, so don't blur
+  document.documentElement.setAttribute('data-pp-ready', 'true');
+
   const sidebar = document.createElement('div');
   sidebar.className = 'pattern-pulse-sidebar';
   sidebar.innerHTML = `
@@ -250,6 +293,9 @@ function showNotInDatabase() {
  * Show completed state (problem already solved)
  */
 function showCompletedState() {
+  // Mark page as ready (removes preemptive shields)
+  document.documentElement.setAttribute('data-pp-ready', 'true');
+
   // Remove any existing sidebar first
   const existing = document.querySelector('.pattern-pulse-sidebar');
   if (existing) existing.remove();
@@ -638,6 +684,9 @@ async function skipQuiz() {
  * Remove shields from page (smooth unblur transition)
  */
 function removeShields() {
+  // Mark page as ready (removes preemptive shields)
+  document.documentElement.setAttribute('data-pp-ready', 'true');
+
   shieldsActive = false;
   document.querySelectorAll('.pattern-pulse-shield').forEach(el => {
     el.classList.add('unlocked');
@@ -712,6 +761,9 @@ function checkUrlChange() {
   if (newSlug && newSlug !== lastProblemSlug) {
     console.log('[PatternPulse] Problem changed:', lastProblemSlug, '->', newSlug);
     lastProblemSlug = newSlug;
+
+    // Reset preemptive shields for new problem (remove data-pp-ready)
+    document.documentElement.removeAttribute('data-pp-ready');
 
     // Reset state for new problem
     currentProblem = null;

@@ -200,8 +200,8 @@ async function resetData() {
  */
 function openFeedback() {
   // Opens GitHub issues page for feedback
-  // You can change this URL to your preferred feedback channel
-  const feedbackUrl = 'https://github.com/anthropics/claude-code/issues';
+  // TODO: Update this URL to your GitHub repo's issues page
+  const feedbackUrl = 'https://github.com/vishshukla/patternpulse/issues';
   chrome.tabs.create({ url: feedbackUrl });
 }
 
