@@ -41,7 +41,36 @@ patternpulse/
 | `extension/shield.css` | All UI styling (sidebar, quiz, buttons, animations) |
 | `extension/data/problemDatabase.js` | Problem data - patterns, hints, explanations |
 
-## Commit Conventions
+## Git Workflow
+
+### Branch Rules
+
+- **NEVER push directly to `main`** - always use feature branches
+- Create branches with descriptive prefixes:
+  - `feature/add-dark-mode`
+  - `fix/scrolling-issue`
+  - `chore/update-docs`
+- Push to your branch, then create a Pull Request to merge into `main`
+
+### For LLMs (Claude, etc.)
+
+```bash
+# 1. Create a new branch BEFORE making changes
+git checkout -b fix/description-of-change
+
+# 2. Make changes, commit
+git add . && git commit -m "Fix the thing"
+
+# 3. Push to the feature branch (NOT main)
+git push -u origin fix/description-of-change
+
+# 4. Tell the user to create a PR or create one via gh cli
+gh pr create --title "Fix the thing" --body "Description"
+```
+
+**IMPORTANT**: If you're on `main`, switch to a new branch first. Never commit directly to main.
+
+### Commit Conventions
 
 - **No AI attribution lines** - don't add "Generated with Claude" or "Co-Authored-By"
 - Keep commit messages concise and descriptive
@@ -49,15 +78,20 @@ patternpulse/
 
 ## Release Process (Fully Automated)
 
-1. Bump `extension/manifest.json` version (e.g., `0.9.1` → `0.9.2`)
-2. Commit with descriptive message (this becomes the release notes)
-3. Push to main
-4. GitHub Actions automatically:
+Releases only trigger when version bumps are merged to `main`:
+
+1. Create a release branch: `git checkout -b release/0.9.2`
+2. Bump `extension/manifest.json` version
+3. Commit with descriptive message (this becomes the release notes)
+4. Push branch and create PR
+5. After PR is merged to `main`, GitHub Actions automatically:
    - Detects version bump
    - Creates GitHub Release
    - Runs tests
    - Builds zip
    - Publishes to Chrome Web Store
+
+**Note**: Pushing to feature branches does NOT trigger releases - only `main`.
 
 ## Architecture Notes
 
