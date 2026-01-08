@@ -1,40 +1,116 @@
- # .github/workflows/publish-extension.yml
-  name: Publish Extension
+# .github/workflows/publish-extension.yml
+name: Publish Extension
 
-  on:
-    release:
-      types: [published]
-    workflow_dispatch:  # Manual trigger for hotfixes
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'extension/manifest.json'
+  workflow_dispatch:  # Manual trigger for hotfixes
 
-  jobs:
-    build-and-publish:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      should_release: ${{ steps.check.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need previous commit to compare
 
-        - name: Setup Node
-          uses: actions/setup-node@v4
-          with:
-            node-version: '20'
+      - name: Get version from manifest
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' extension/manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
 
-        - name: Install dependencies
-          run: npm ci
+      - name: Check if version changed
+        id: check
+        run: |
+          # Get version from previous commit
+          git show HEAD~1:extension/manifest.json > /tmp/old_manifest.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/old_manifest.json
+          OLD_VERSION=$(jq -r '.version' /tmp/old_manifest.json)
+          NEW_VERSION=$(jq -r '.version' extension/manifest.json)
 
-        - name: Run tests
-          run: npm test
+          echo "Old version: $OLD_VERSION"
+          echo "New version: $NEW_VERSION"
 
-        - name: Build extension zip
-          run: |
-            cd extension
-            zip -r ../patternpulse-${{ github.ref_name }}.zip . \
-              -x "*.git*" -x "node_modules/*" -x "*.map"
+          if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "Version bumped! Will create release."
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "Version unchanged. Skipping release."
+          fi
 
-        - name: Upload to Chrome Web Store
-          uses: mnao305/chrome-extension-upload@v5.0.0
-          with:
-            file-path: patternpulse-${{ github.ref_name }}.zip
-            extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
-            client-id: ${{ secrets.CHROME_CLIENT_ID }}
-            client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
-            refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-            publish: true  # Auto-publish after upload
+  create-release:
+    needs: check-version
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.create_release.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get commit message
+        id: commit_msg
+        run: |
+          # Get the commit message (multiline safe)
+          MSG=$(git log -1 --pretty=%B)
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          echo "$MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="v${{ needs.check-version.outputs.version }}"
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+
+          # Create release with commit message as body
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --notes "${{ steps.commit_msg.outputs.message }}"
+
+          echo "Created release $VERSION"
+
+  build-and-publish:
+    needs: [check-version, create-release]
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build extension zip
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          cd extension
+          zip -r ../patternpulse-v${VERSION}.zip . \
+            -x "*.git*" -x "node_modules/*" -x "*.map"
+
+      - name: Upload to Chrome Web Store
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        with:
+          file-path: patternpulse-v${{ needs.check-version.outputs.version }}.zip
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          publish: true
