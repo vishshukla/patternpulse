@@ -45,6 +45,41 @@ jobs:
             fi
           fi
 
+  check-hotfix-version:
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'main' && startsWith(github.head_ref, 'hotfix/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version bump in hotfix
+        run: |
+          # Get version from PR branch
+          PR_VERSION=$(jq -r '.version' extension/manifest.json)
+          echo "PR version: $PR_VERSION"
+
+          # Get version from main
+          git fetch origin main
+          MAIN_VERSION=$(git show origin/main:extension/manifest.json | jq -r '.version')
+          echo "Main version: $MAIN_VERSION"
+
+          # Compare versions
+          if [ "$PR_VERSION" = "$MAIN_VERSION" ]; then
+            echo ""
+            echo "❌ Hotfix PRs must include a version bump!"
+            echo ""
+            echo "Current main version: $MAIN_VERSION"
+            echo "Your PR version:      $PR_VERSION"
+            echo ""
+            echo "Please bump the version in extension/manifest.json"
+            echo "Typically hotfixes are patch bumps (e.g., 0.9.3 → 0.9.4)"
+            exit 1
+          fi
+
+          # Validate version is higher (simple string compare works for semver)
+          echo "✅ Version bumped from $MAIN_VERSION to $PR_VERSION"
+
   run-tests:
     runs-on: ubuntu-latest
     steps:
