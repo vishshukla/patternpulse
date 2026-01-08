@@ -63,12 +63,17 @@ jobs:
             NOTES=$(git log --pretty=format:"- %s" -10 | grep -vE "^- chore:")
           fi
 
+          # Write release notes to temp file to avoid YAML parsing issues
+          cat > /tmp/release_notes.md << RNEOF
+          ## Changes
+
+          ${NOTES}
+          RNEOF
+
           # Create GitHub release
           gh release create "$TAG" \
             --title "Release $TAG" \
-            --notes "## Changes
-
-$NOTES"
+            --notes-file /tmp/release_notes.md
 
           echo "Created release $TAG"
 
