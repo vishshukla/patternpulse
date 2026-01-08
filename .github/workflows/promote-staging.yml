@@ -121,21 +121,25 @@ jobs:
           # Get commit messages for PR body
           COMMITS=$(git log origin/main..staging --pretty=format:"- %s" | head -20)
           VERSION="${{ steps.version.outputs.new_version }}"
+          BUMP_TYPE="${{ steps.version.outputs.bump_type }}"
 
           gh pr create \
             --base main \
             --head staging \
             --title "Release v${VERSION}: Promote staging to main" \
-            --body "## Automated promotion of staging changes
+            --body "$(cat <<EOF
+## Automated promotion of staging changes
 
 ### Version
-v${VERSION} (${{ steps.version.outputs.bump_type }} bump)
+v${VERSION} (${BUMP_TYPE} bump)
 
 ### Commits included:
-$COMMITS
+${COMMITS}
 
 ---
-*This PR was created automatically by the promote-staging workflow.*"
+*This PR was created automatically by the promote-staging workflow.*
+EOF
+)"
 
       - name: Enable auto-merge
         if: steps.check.outputs.commits_ahead > 0
