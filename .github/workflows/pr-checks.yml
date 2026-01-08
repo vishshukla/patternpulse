@@ -1,0 +1,46 @@
+# .github/workflows/pr-checks.yml
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Source branch: $BRANCH"
+
+          # Allowed patterns: release/, hotfix/, fix/
+          if [[ "$BRANCH" =~ ^(release/|hotfix/|fix/) ]]; then
+            echo "✅ Branch '$BRANCH' is allowed to merge to main"
+          else
+            echo "❌ Branch '$BRANCH' cannot merge to main"
+            echo ""
+            echo "Only these branch prefixes can merge to main:"
+            echo "  - release/*  (new versions)"
+            echo "  - hotfix/*   (urgent production fixes)"
+            echo "  - fix/*      (bug fixes)"
+            echo ""
+            echo "For features, merge to a release branch first."
+            exit 1
+          fi
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
