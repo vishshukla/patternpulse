@@ -3,7 +3,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, staging]
 
 jobs:
   check-branch-name:
@@ -12,21 +12,37 @@ jobs:
       - name: Check branch name
         run: |
           BRANCH="${{ github.head_ref }}"
+          TARGET="${{ github.base_ref }}"
           echo "Source branch: $BRANCH"
+          echo "Target branch: $TARGET"
 
-          # Allowed patterns: release/, hotfix/, fix/
-          if [[ "$BRANCH" =~ ^(release/|hotfix/|fix/) ]]; then
-            echo "✅ Branch '$BRANCH' is allowed to merge to main"
-          else
-            echo "❌ Branch '$BRANCH' cannot merge to main"
-            echo ""
-            echo "Only these branch prefixes can merge to main:"
-            echo "  - release/*  (new versions)"
-            echo "  - hotfix/*   (urgent production fixes)"
-            echo "  - fix/*      (bug fixes)"
-            echo ""
-            echo "For features, merge to a release branch first."
-            exit 1
+          # Rules for PRs to main
+          if [ "$TARGET" = "main" ]; then
+            if [[ "$BRANCH" =~ ^(staging|hotfix/|release/) ]]; then
+              echo "✅ Branch '$BRANCH' is allowed to merge to main"
+            else
+              echo "❌ Branch '$BRANCH' cannot merge to main"
+              echo ""
+              echo "Only these can merge to main:"
+              echo "  - staging     (daily promotion)"
+              echo "  - hotfix/*    (urgent production fixes)"
+              echo "  - release/*   (manual releases)"
+              exit 1
+            fi
+          fi
+
+          # Rules for PRs to staging
+          if [ "$TARGET" = "staging" ]; then
+            if [[ "$BRANCH" =~ ^(feature/|fix/) ]]; then
+              echo "✅ Branch '$BRANCH' is allowed to merge to staging"
+            else
+              echo "❌ Branch '$BRANCH' cannot merge to staging"
+              echo ""
+              echo "Only these can merge to staging:"
+              echo "  - feature/*   (new features)"
+              echo "  - fix/*       (bug fixes)"
+              exit 1
+            fi
           fi
 
   run-tests:
