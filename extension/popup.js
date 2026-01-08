@@ -20,19 +20,28 @@ async function getCurrentProblemStatus() {
 }
 
 /**
- * Load and display user statistics
+ * Load and display user statistics with timeout
  */
 async function loadStats() {
   try {
-    // Check if current page is a problem not in database
-    const problemStatus = await getCurrentProblemStatus();
+    // Add timeout to prevent infinite loading
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 5000)
+    );
 
-    const stats = await storage.getStats();
-    const strength = await storage.getPatternStrength();
+    const loadData = async () => {
+      const problemStatus = await getCurrentProblemStatus();
+      const stats = await storage.getStats();
+      const strength = await storage.getPatternStrength();
+      return { problemStatus, stats, strength };
+    };
+
+    const { problemStatus, stats, strength } = await Promise.race([loadData(), timeout]);
     displayStats(stats, strength, problemStatus);
   } catch (error) {
     console.error('[Popup] Error loading stats:', error);
-    showError();
+    // Show empty state instead of error spinner
+    displayStats({ total: 0, completed: 0, patterns: {}, streak: 0 }, { strongest: [], all: [] }, null);
   }
 }
 
@@ -62,22 +71,26 @@ function displayStats(stats, strength, problemStatus) {
   if (stats.total === 0) {
     // Show empty state (with not-in-db banner if applicable)
     content.innerHTML = `
-      ${showNotInDbBanner ? renderNotInDatabaseBanner(problemStatus.slug) : ''}
-      <div class="empty-state">
-        <div class="empty-state-icon">🎯</div>
-        <div class="empty-state-text">
-          <strong>No patterns tracked yet</strong>
-          Start identifying patterns on LeetCode problems.
+      <div class="scrollable-content">
+        ${showNotInDbBanner ? renderNotInDatabaseBanner(problemStatus.slug) : ''}
+        <div class="empty-state">
+          <div class="empty-state-icon">🎯</div>
+          <div class="empty-state-text">
+            <strong>No patterns tracked yet</strong>
+            Start identifying patterns on LeetCode problems.
+          </div>
         </div>
       </div>
 
-      ${renderRandomButton(0)}
+      <div class="fixed-footer">
+        ${renderRandomButton(0)}
 
-      <button class="btn btn-feedback" id="feedback-btn">
-        💬 Send Feedback
-      </button>
+        <button class="btn btn-feedback" id="feedback-btn">
+          💬 Send Feedback
+        </button>
 
-      ${renderFooter()}
+        ${renderFooter()}
+      </div>
     `;
 
     // Add event listeners for empty state
@@ -100,50 +113,54 @@ function displayStats(stats, strength, problemStatus) {
     .slice(0, 10); // Top 10 patterns
 
   content.innerHTML = `
-    ${showNotInDbBanner ? renderNotInDatabaseBanner(problemStatus.slug) : ''}
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value">${stats.completed}</div>
-        <div class="stat-label">Completed</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">${stats.streak}<span class="streak-icon">🔥</span></div>
-        <div class="stat-label">Streak</div>
-      </div>
-    </div>
-
-    ${renderPatternStrength(strength)}
-
-    ${sortedPatterns.length > 0 ? `
-      <div class="patterns-section">
-        <div class="section-title">Pattern Mastery</div>
-        <div class="pattern-list">
-          ${sortedPatterns.map(([pattern, count]) => `
-            <div class="pattern-item">
-              <div class="pattern-name">${pattern}</div>
-              <div class="pattern-count">${count}</div>
-            </div>
-          `).join('')}
+    <div class="scrollable-content">
+      ${showNotInDbBanner ? renderNotInDatabaseBanner(problemStatus.slug) : ''}
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">${stats.completed}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.streak}<span class="streak-icon">🔥</span></div>
+          <div class="stat-label">Streak</div>
         </div>
       </div>
-    ` : ''}
 
-    ${renderRandomButton(stats.completed)}
+      ${renderPatternStrength(strength)}
 
-    <div class="actions">
-      <button class="btn btn-primary" id="export-btn">
-        Export Data
-      </button>
-      <button class="btn btn-secondary" id="reset-btn">
-        Reset
-      </button>
+      ${sortedPatterns.length > 0 ? `
+        <div class="patterns-section">
+          <div class="section-title">Pattern Mastery</div>
+          <div class="pattern-list">
+            ${sortedPatterns.map(([pattern, count]) => `
+              <div class="pattern-item">
+                <div class="pattern-name">${pattern}</div>
+                <div class="pattern-count">${count}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
     </div>
 
-    <button class="btn btn-feedback" id="feedback-btn">
-      💬 Send Feedback
-    </button>
+    <div class="fixed-footer">
+      ${renderRandomButton(stats.completed)}
 
-    ${renderFooter()}
+      <div class="actions">
+        <button class="btn btn-primary" id="export-btn">
+          Export Data
+        </button>
+        <button class="btn btn-secondary" id="reset-btn">
+          Reset
+        </button>
+      </div>
+
+      <button class="btn btn-feedback" id="feedback-btn">
+        💬 Send Feedback
+      </button>
+
+      ${renderFooter()}
+    </div>
   `;
 
   // Add event listeners
@@ -226,19 +243,29 @@ function renderRandomButton(completedCount) {
 
   const allDone = remaining <= 0;
 
+  // Show encouraging progress message
+  let progressText = '';
+  if (allDone) {
+    progressText = 'All solved - practice mode';
+  } else if (completedCount === 0) {
+    progressText = 'More problems coming soon';
+  } else {
+    progressText = `${completedCount} solved - more coming soon`;
+  }
+
   return `
-    <button class="btn btn-random" id="random-btn" ${allDone ? 'disabled' : ''}>
+    <button class="btn btn-random" id="random-btn">
       <span class="dice-icon">🎲</span>
-      ${allDone ? 'All Problems Completed!' : 'Random Problem'}
+      ${allDone ? 'Random (Practice)' : 'Random Problem'}
     </button>
     <div class="random-stats">
-      ${remaining} of ${totalProblems} problems remaining
+      ${progressText}
     </div>
   `;
 }
 
 /**
- * Open a random uncompleted problem
+ * Open a random problem (uncompleted first, or any if all done)
  */
 async function openRandomProblem() {
   try {
@@ -256,21 +283,23 @@ async function openRandomProblem() {
     );
 
     // Get all problems from database that aren't completed
-    const uncompletedProblems = Object.values(PROBLEM_DATABASE)
-      .filter(p => !completedSlugs.has(p.slug));
+    const allProblems = Object.values(PROBLEM_DATABASE);
+    const uncompletedProblems = allProblems.filter(p => !completedSlugs.has(p.slug));
 
-    if (uncompletedProblems.length === 0) {
-      showNotification('All problems completed! 🎉', 'success');
-      return;
-    }
+    // Pick from uncompleted if available, otherwise pick any (practice mode)
+    const problemPool = uncompletedProblems.length > 0 ? uncompletedProblems : allProblems;
 
     // Pick a random one
-    const randomIndex = Math.floor(Math.random() * uncompletedProblems.length);
-    const randomProblem = uncompletedProblems[randomIndex];
+    const randomIndex = Math.floor(Math.random() * problemPool.length);
+    const randomProblem = problemPool[randomIndex];
 
-    // Open in new tab
+    // Open in current tab
     const url = `https://leetcode.com/problems/${randomProblem.slug}/`;
-    chrome.tabs.create({ url });
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) {
+        chrome.tabs.update(tabs[0].id, { url });
+      }
+    });
 
   } catch (error) {
     console.error('[Popup] Error opening random problem:', error);

@@ -38,47 +38,67 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 
-/* The clickable tab */
+/* The clickable tab - minimal peek style */
 .pattern-pulse-tab {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 80px;
-  background: #1a1a2e;
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  border-right: none;
-  border-radius: 12px 0 0 12px;
+  width: 5px;
+  height: 60px;
+  background: rgba(99, 102, 241, 0.6);
+  border: none;
+  border-radius: 4px 0 0 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
+  overflow: hidden;
 }
 
-.pattern-pulse-tab:hover {
-  width: 42px;
-  background: #1e1e36;
+/* Expand tab on hover */
+.pattern-pulse-tab:hover,
+.pattern-pulse-sidebar:hover .pattern-pulse-tab {
+  width: 36px;
+  height: 70px;
+  background: #1a1a2e;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.3);
 }
 
 .pattern-pulse-tab svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+/* Show icon when tab is expanded */
+.pattern-pulse-tab:hover svg,
+.pattern-pulse-sidebar:hover .pattern-pulse-tab svg {
+  opacity: 1;
+}
+
+.pattern-pulse-tab svg circle,
+.pattern-pulse-tab svg path {
+  transition: fill 0.3s ease, stroke 0.3s ease;
 }
 
 /* The expanded panel */
 .pattern-pulse-panel {
   position: absolute;
-  right: 44px; /* 36px tab + 8px gap */
+  right: 42px; /* appears next to expanded tab */
   top: 50%;
   width: 280px;
   max-height: 80vh;
   background: #1a1a2e;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border-radius: 14px;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   overflow-y: auto;
   color: #e4e4e7;
@@ -87,6 +107,13 @@
   transform: translateY(-50%) translateX(10px);
   transition: all 0.2s ease-out;
   pointer-events: none;
+  /* Hide scrollbar */
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.pattern-pulse-panel::-webkit-scrollbar {
+  display: none;  /* Chrome/Safari */
 }
 
 /* Show panel on sidebar hover */
@@ -98,24 +125,69 @@
   pointer-events: auto;
 }
 
-/* Connector between tab and panel */
+/* Connector between tab and panel - bridges the gap for smoother hover */
 .pattern-pulse-sidebar::before {
   content: '';
   position: absolute;
-  right: 36px;
+  right: 5px;
   top: 50%;
   transform: translateY(-50%);
-  width: 12px;
-  height: 60px;
+  width: 45px; /* Bridge from peek to panel */
+  height: 150px;
   background: transparent;
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
 }
 
 .pattern-pulse-sidebar:hover::before {
-  opacity: 1;
   pointer-events: auto; /* Allows hover to continue between tab and panel */
+}
+
+/* Extended hover area on right side (window edge) */
+.pattern-pulse-sidebar::after {
+  content: '';
+  position: absolute;
+  right: -10px; /* Extend past the tab to window edge */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 100px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.pattern-pulse-sidebar:hover::after {
+  pointer-events: auto;
+}
+
+/* Transition animations */
+.pattern-pulse-sidebar.transitioning-out {
+  animation: sidebarFadeOut 0.2s ease forwards;
+}
+
+.pattern-pulse-sidebar.transitioning-in {
+  animation: sidebarFadeIn 0.3s ease forwards;
+}
+
+@keyframes sidebarFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.95);
+  }
+}
+
+@keyframes sidebarFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 /* When pinned, keep tab highlighted */
@@ -126,6 +198,11 @@
 
 /* Skipped state - muted tab color */
 .pattern-pulse-sidebar.skipped .pattern-pulse-tab {
+  background: rgba(107, 114, 128, 0.5);
+}
+
+.pattern-pulse-sidebar.skipped .pattern-pulse-tab:hover,
+.pattern-pulse-sidebar.skipped:hover .pattern-pulse-tab {
   background: #2a2a3e;
   border-color: rgba(100, 100, 120, 0.3);
 }
@@ -136,9 +213,7 @@
   stroke: #6b7280;
 }
 
-.pattern-pulse-sidebar.skipped .pattern-pulse-panel {
-  display: none;
-}
+/* Skipped panel is now visible with content */
 
 /* Wrong answer flash - subtle red glow on tab */
 .pattern-pulse-tab.wrong-flash {
@@ -147,29 +222,31 @@
 
 @keyframes wrongFlash {
   0% {
-    background: #1a1a2e;
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    background: rgba(99, 102, 241, 0.6);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
   }
   30% {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.5);
-    box-shadow: -4px 0 20px rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.8);
+    box-shadow: -2px 0 12px rgba(239, 68, 68, 0.4);
   }
   100% {
-    background: #1a1a2e;
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    background: rgba(99, 102, 241, 0.6);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
   }
 }
 
 .pattern-pulse-quiz {
-  padding: 20px;
+  padding: 14px;
   height: 100%;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  background: #1a1a2e;
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
 }
 
 /* ========================================
@@ -178,8 +255,8 @@
 
 .quiz-header {
   position: relative;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -340,21 +417,21 @@
 .quiz-problem {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 16px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
 }
 
 .quiz-problem h3 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  margin-bottom: 6px;
-  line-height: 1.4;
+  margin-bottom: 4px;
+  line-height: 1.3;
   color: #fff;
 }
 
 .quiz-hint {
-  font-size: 12px;
+  font-size: 11px;
   color: #71717a;
 }
 
@@ -364,26 +441,24 @@
 
 .quiz-patterns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 16px;
-  max-height: 50vh;
-  overflow-y: auto;
-  padding-right: 4px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 2px;
 }
 
 .pattern-button {
   background: rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(99, 102, 241, 0.3);
-  border-radius: 10px;
-  padding: 12px 10px;
+  border-radius: 8px;
+  padding: 8px 6px;
   color: #e4e4e7;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .pattern-button:hover {
@@ -393,22 +468,39 @@
   transform: translateY(-1px);
 }
 
-/* Scrollbar styling */
-.quiz-patterns::-webkit-scrollbar {
-  width: 4px;
-}
-
-.quiz-patterns::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.quiz-patterns::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 2px;
-}
-
 .pattern-button:active {
   transform: scale(0.98);
+}
+
+/* Wrong answer shake on the button itself */
+.pattern-button.wrong-shake {
+  animation: buttonWrongShake 0.5s ease;
+}
+
+@keyframes buttonWrongShake {
+  0% {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+  20% {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: translateX(-2px);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  60% {
+    transform: translateX(-1px);
+  }
+  80% {
+    transform: translateX(1px);
+  }
+  100% {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateX(0);
+  }
 }
 
 /* ========================================
@@ -416,21 +508,21 @@
    ======================================== */
 
 .quiz-hints {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .hint-button {
   width: 100%;
   background: rgba(251, 191, 36, 0.1);
   border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 10px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 8px 10px;
   color: #fbbf24;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .hint-button:hover:not(:disabled) {
@@ -503,17 +595,18 @@
 .wrong-feedback {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
-  font-size: 12px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  font-size: 11px;
   font-weight: 500;
   text-align: center;
   color: #f87171;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  gap: 8px;
   align-items: center;
+  justify-content: center;
 }
 
 .feedback-dispute {
@@ -754,9 +847,9 @@
   background: transparent;
   color: #71717a;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-size: 13px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -769,7 +862,8 @@
 
 .quiz-footer {
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 10px;
+  background: #1a1a2e;
 }
 
 /* ========================================
@@ -806,21 +900,20 @@
    ======================================== */
 
 .pattern-pulse-quiz::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .pattern-pulse-quiz::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  background: transparent;
 }
 
 .pattern-pulse-quiz::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 2px;
 }
 
 .pattern-pulse-quiz::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(99, 102, 241, 0.5);
 }
 
 /* ========================================
@@ -849,83 +942,270 @@
 }
 
 /* ========================================
-   TITLE BADGE - Inline badge next to problem title
+   COMPLETED STATE - Green tab
    ======================================== */
 
-.pattern-pulse-title-badge {
-  position: relative;
-  display: inline-flex;
+.pattern-pulse-sidebar.completed .pattern-pulse-tab {
+  background: rgba(34, 197, 94, 0.7);
+}
+
+.pattern-pulse-sidebar.completed .pattern-pulse-tab:hover,
+.pattern-pulse-sidebar.completed:hover .pattern-pulse-tab {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+/* Completed panel content */
+.completed-content {
+  padding: 20px;
+  text-align: center;
+}
+
+.completed-header {
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  margin-left: 10px;
-  vertical-align: middle;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.pattern-pulse-title-badge:hover {
-  transform: scale(1.1);
+.completed-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #22c55e;
 }
 
-.pattern-pulse-title-badge > svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
+.completed-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #22c55e;
+  margin: 0;
 }
 
-/* Tooltip on hover - positioned to the right */
-.pattern-pulse-tooltip {
-  position: absolute;
-  left: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: #1a1a2e;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 12px;
-  font-weight: 400;
-  color: #e5e5e5;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  z-index: 999999;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  pointer-events: none;
+.completed-details {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
 }
 
-.pattern-pulse-tooltip strong {
-  color: #4ade80;
+.completed-pattern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.completed-pattern .label {
+  color: #71717a;
+}
+
+.completed-pattern .value {
+  color: #22c55e;
   font-weight: 600;
 }
 
-.pattern-pulse-title-badge:hover .pattern-pulse-tooltip {
-  opacity: 1;
-  visibility: visible;
+.completed-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Arrow pointing left */
-.pattern-pulse-tooltip::before {
-  content: '';
-  position: absolute;
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 6px solid transparent;
-  border-right-color: rgba(34, 197, 94, 0.3);
+.completed-stat .label {
+  color: #71717a;
 }
 
-.pattern-pulse-tooltip::after {
-  content: '';
-  position: absolute;
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 5px solid transparent;
-  border-right-color: #1a1a2e;
+.completed-stat .value {
+  color: #fbbf24;
+}
+
+.completed-perfect {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: #4ade80;
+  font-weight: 500;
+}
+
+/* Hints used section in completed panel */
+.completed-hints-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.completed-hints-header {
+  font-size: 11px;
+  color: #fbbf24;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.completed-hints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.completed-hint-item {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.completed-hint-item .hint-num {
+  color: #71717a;
+  flex-shrink: 0;
+}
+
+.completed-hint-item .hint-text {
+  color: #a1a1aa;
+}
+
+.completed-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.practice-button {
+  width: 100%;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.practice-button:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #c7d2fe;
+}
+
+.reset-button {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #52525b;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reset-button:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+/* ========================================
+   NOT IN DATABASE STATE - Gray tab
+   ======================================== */
+
+.pattern-pulse-sidebar.not-in-db .pattern-pulse-tab {
+  background: rgba(107, 114, 128, 0.5);
+}
+
+.pattern-pulse-sidebar.not-in-db .pattern-pulse-tab:hover,
+.pattern-pulse-sidebar.not-in-db:hover .pattern-pulse-tab {
+  background: #2a2a3e;
+  border-color: rgba(100, 100, 120, 0.3);
+}
+
+/* Not in DB panel content */
+.not-in-db-content {
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.not-in-db-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.not-in-db-message {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #a1a1aa;
+  margin: 0;
+}
+
+/* ========================================
+   SKIPPED STATE - Gray tab with panel
+   ======================================== */
+
+/* Skipped panel content */
+.skipped-content {
+  padding: 20px;
+  text-align: center;
+}
+
+.skipped-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.skipped-icon {
+  font-size: 20px;
+}
+
+.skipped-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.skipped-message {
+  font-size: 12px;
+  color: #71717a;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.retry-button {
+  width: 100%;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.retry-button:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #c4b5fd;
 }
 
 /* ========================================
@@ -936,15 +1216,24 @@
   background: rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 8px;
-  padding: 10px 12px;
-  margin-bottom: 16px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
 }
 
 .quiz-explainer p {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.3;
   color: #a5b4fc;
+}
+
+.quiz-explainer.practice-mode {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.quiz-explainer.practice-mode p {
+  color: #4ade80;
 }
 
 /* ========================================

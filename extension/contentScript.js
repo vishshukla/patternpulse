@@ -89,6 +89,7 @@ let hintsGiven = 0;
 let wrongAttempts = 0;
 let shieldsActive = false;
 let currentSlug = null;
+let isPracticeMode = false;
 
 /**
  * Initialize extension on page load
@@ -135,16 +136,17 @@ async function init() {
     currentProgress = await storage.getProgress(slug);
 
     if (currentProgress && currentProgress.completed) {
-      // Already solved - show completed state (no shields)
-      console.log('[PatternPulse] Problem already completed');
-      // Save status for popup
+      // Already solved - show practice mode (green quiz, no shields)
+      console.log('[PatternPulse] Problem already completed - practice mode');
       saveCurrentProblemStatus({
         slug: currentSlug,
         inDatabase: true,
         completed: true,
         pattern: currentProgress.pattern
       });
-      showCompletedState();
+      isPracticeMode = true;
+      showQuiz();
+      document.documentElement.setAttribute('data-pp-ready', 'true');
       return;
     }
 
@@ -284,22 +286,59 @@ async function saveCurrentProblemStatus(status) {
 }
 
 /**
- * Handle problem not in database - no UI shown, just save status for popup
+ * Handle problem not in database - show gray tab with info panel
  */
 function showNotInDatabase() {
   // Mark page as ready (removes preemptive shields) - problem not in DB, so don't blur
   document.documentElement.setAttribute('data-pp-ready', 'true');
+
+  // Remove any existing sidebar first
+  const existing = document.querySelector('.pattern-pulse-sidebar');
+  if (existing) existing.remove();
 
   // Make absolutely sure no shields remain from previous problem
   document.querySelectorAll('.pattern-pulse-shield').forEach(el => {
     el.classList.remove('pattern-pulse-shield', 'unlocked');
   });
 
-  // Save status for popup - no sidebar/badge shown for problems not in DB
+  // Save status for popup
   saveCurrentProblemStatus({
     slug: currentSlug,
     inDatabase: false
   });
+
+  // Show sidebar with not-in-database state
+  const sidebar = createNotInDbSidebar();
+  document.body.appendChild(sidebar);
+}
+
+/**
+ * Create not-in-database sidebar (gray tab, info panel)
+ */
+function createNotInDbSidebar() {
+  const sidebar = document.createElement('div');
+  sidebar.className = 'pattern-pulse-sidebar not-in-db';
+
+  sidebar.innerHTML = `
+    <div class="pattern-pulse-tab" title="PatternPulse - Problem not in database">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="6" r="2.5" fill="#6b7280"/>
+        <circle cx="18" cy="6" r="2.5" fill="#9ca3af"/>
+        <circle cx="6" cy="18" r="2.5" fill="#9ca3af"/>
+        <circle cx="18" cy="18" r="2.5" fill="#6b7280"/>
+        <circle cx="12" cy="12" r="2.5" fill="#d1d5db"/>
+        <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="pattern-pulse-panel">
+      <div class="pattern-pulse-content not-in-db-content">
+        <div class="not-in-db-icon">☕</div>
+        <p class="not-in-db-message">This problem isn't in PatternPulse yet — we're working on it!</p>
+      </div>
+    </div>
+  `;
+
+  return sidebar;
 }
 
 /**
@@ -309,68 +348,52 @@ function showCompletedState() {
   // Mark page as ready (removes preemptive shields)
   document.documentElement.setAttribute('data-pp-ready', 'true');
 
-  // Remove any existing sidebar/badge first
+  // Remove any existing sidebar first
   const existing = document.querySelector('.pattern-pulse-sidebar');
   if (existing) existing.remove();
-  const existingBadge = document.querySelector('.pattern-pulse-title-badge');
-  if (existingBadge) existingBadge.remove();
 
   // Make absolutely sure no shields remain
   document.querySelectorAll('.pattern-pulse-shield').forEach(el => {
     el.classList.remove('pattern-pulse-shield', 'unlocked');
   });
 
-  // Try to inject badge next to problem title
-  injectTitleBadge();
+  // Show sidebar with completed state
+  const sidebar = createCompletedSidebar();
+  document.body.appendChild(sidebar);
 }
 
 /**
- * Inject a small badge next to the problem title
+ * Create completed state sidebar (green tab, summary panel)
  */
-function injectTitleBadge() {
-  // Find LeetCode's problem title - try multiple selectors
-  const titleSelectors = [
-    '[data-cy="question-title"]',
-    '.text-title-large',
-    'div[class*="text-title"]',
-    'h4[class*="text-"]'
-  ];
+function createCompletedSidebar() {
+  const sidebar = document.createElement('div');
+  sidebar.className = 'pattern-pulse-sidebar completed';
 
-  let titleElement = null;
-  for (const selector of titleSelectors) {
-    titleElement = document.querySelector(selector);
-    if (titleElement) break;
-  }
-
-  if (!titleElement) {
-    // Fallback: try again after a short delay (title might not be rendered yet)
-    setTimeout(injectTitleBadge, 500);
-    return;
-  }
-
-  // Don't add duplicate badge
-  if (titleElement.querySelector('.pattern-pulse-title-badge')) return;
-
-  // Create badge with PatternPulse logo in green
-  const badge = document.createElement('span');
-  badge.className = 'pattern-pulse-title-badge';
-  badge.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="6" cy="6" r="2.5" fill="#22c55e"/>
-      <circle cx="18" cy="6" r="2.5" fill="#16a34a"/>
-      <circle cx="6" cy="18" r="2.5" fill="#16a34a"/>
-      <circle cx="18" cy="18" r="2.5" fill="#22c55e"/>
-      <circle cx="12" cy="12" r="2.5" fill="#4ade80"/>
-      <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-    </svg>
-    <span class="pattern-pulse-tooltip">
-      Seen<br>
-      <strong>Pattern: ${currentProgress.pattern}</strong>
-    </span>
+  sidebar.innerHTML = `
+    <div class="pattern-pulse-tab" title="PatternPulse - Completed">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="6" r="2.5" fill="#22c55e"/>
+        <circle cx="18" cy="6" r="2.5" fill="#16a34a"/>
+        <circle cx="6" cy="18" r="2.5" fill="#16a34a"/>
+        <circle cx="18" cy="18" r="2.5" fill="#22c55e"/>
+        <circle cx="12" cy="12" r="2.5" fill="#4ade80"/>
+        <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="pattern-pulse-panel">
+      <div class="pattern-pulse-content completed-content">
+        <div class="completed-header">
+          <div class="completed-icon">✓</div>
+          <h3>Completed</h3>
+        </div>
+        <div class="completed-pattern">
+          <span class="value">${currentProgress.pattern}</span>
+        </div>
+      </div>
+    </div>
   `;
 
-  // Append after the title text (right side)
-  titleElement.appendChild(badge);
+  return sidebar;
 }
 
 /**
@@ -393,16 +416,28 @@ function showQuiz() {
  */
 function createQuizSidebar() {
   const sidebar = document.createElement('div');
-  sidebar.className = 'pattern-pulse-sidebar';
+  sidebar.className = isPracticeMode ? 'pattern-pulse-sidebar completed' : 'pattern-pulse-sidebar';
+
+  // Green icons for practice mode, purple for new
+  const iconColor1 = isPracticeMode ? '#22c55e' : '#6366f1';
+  const iconColor2 = isPracticeMode ? '#16a34a' : '#8b5cf6';
+  const iconColor3 = isPracticeMode ? '#4ade80' : '#a78bfa';
+
+  const explainerText = isPracticeMode
+    ? '✓ Solved before - practicing'
+    : '🔒 Hints & solutions blurred until you identify the pattern.';
+
+  const explainerClass = isPracticeMode ? 'quiz-explainer practice-mode' : 'quiz-explainer';
+
   sidebar.innerHTML = `
-    <div class="pattern-pulse-tab" title="PatternPulse - Identify the pattern">
+    <div class="pattern-pulse-tab" title="PatternPulse">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="2.5" fill="#6366f1"/>
-        <circle cx="18" cy="6" r="2.5" fill="#8b5cf6"/>
-        <circle cx="6" cy="18" r="2.5" fill="#8b5cf6"/>
-        <circle cx="18" cy="18" r="2.5" fill="#6366f1"/>
-        <circle cx="12" cy="12" r="2.5" fill="#a78bfa"/>
-        <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+        <circle cx="6" cy="6" r="2.5" fill="${iconColor1}"/>
+        <circle cx="18" cy="6" r="2.5" fill="${iconColor2}"/>
+        <circle cx="6" cy="18" r="2.5" fill="${iconColor2}"/>
+        <circle cx="18" cy="18" r="2.5" fill="${iconColor1}"/>
+        <circle cx="12" cy="12" r="2.5" fill="${iconColor3}"/>
+        <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="${iconColor1}" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
       </svg>
     </div>
     <div class="pattern-pulse-panel">
@@ -411,20 +446,20 @@ function createQuizSidebar() {
           <div class="quiz-header-brand">
             <div class="quiz-logo">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="6" cy="6" r="2.5" fill="#6366f1"/>
-                <circle cx="18" cy="6" r="2.5" fill="#8b5cf6"/>
-                <circle cx="6" cy="18" r="2.5" fill="#8b5cf6"/>
-                <circle cx="18" cy="18" r="2.5" fill="#6366f1"/>
-                <circle cx="12" cy="12" r="2.5" fill="#a78bfa"/>
-                <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                <circle cx="6" cy="6" r="2.5" fill="${iconColor1}"/>
+                <circle cx="18" cy="6" r="2.5" fill="${iconColor2}"/>
+                <circle cx="6" cy="18" r="2.5" fill="${iconColor2}"/>
+                <circle cx="18" cy="18" r="2.5" fill="${iconColor1}"/>
+                <circle cx="12" cy="12" r="2.5" fill="${iconColor3}"/>
+                <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="${iconColor1}" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
               </svg>
             </div>
             <h2>PatternPulse</h2>
           </div>
         </div>
 
-        <div class="quiz-explainer">
-          <p>🔒 Hints, tags & solutions are blurred until you identify the pattern — just like in a real interview.</p>
+        <div class="${explainerClass}">
+          <p>${explainerText}</p>
         </div>
 
         <div class="quiz-problem">
@@ -448,8 +483,8 @@ function createQuizSidebar() {
         </div>
 
         <div class="quiz-footer">
-          <button class="skip-button" id="skip-button">
-            Skip for now
+          <button class="${isPracticeMode ? 'reset-button' : 'skip-button'}" id="footer-button">
+            ${isPracticeMode ? 'Reset Problem' : 'Skip for now'}
           </button>
         </div>
       </div>
@@ -458,11 +493,26 @@ function createQuizSidebar() {
 
   // Add event listeners
   sidebar.querySelectorAll('.pattern-button').forEach(btn => {
-    btn.addEventListener('click', (e) => handlePatternSelection(e.target.dataset.pattern));
+    btn.addEventListener('click', (e) => handlePatternSelection(e.target.dataset.pattern, e.target));
   });
 
   sidebar.querySelector('#hint-button').addEventListener('click', showHint);
-  sidebar.querySelector('#skip-button').addEventListener('click', skipQuiz);
+
+  if (isPracticeMode) {
+    sidebar.querySelector('#footer-button').addEventListener('click', async () => {
+      const confirmed = confirm('Reset this problem? You will need to identify the pattern again.');
+      if (!confirmed) return;
+      await storage.saveProgress(currentProblem.slug, { completed: false, skipped: false });
+      closeSidebar();
+      isPracticeMode = false;
+      quizShown = false;
+      hintsGiven = 0;
+      wrongAttempts = 0;
+      init();
+    });
+  } else {
+    sidebar.querySelector('#footer-button').addEventListener('click', skipQuiz);
+  }
 
   return sidebar;
 }
@@ -477,7 +527,7 @@ function normalizePattern(pattern) {
 /**
  * Handle pattern selection
  */
-async function handlePatternSelection(selectedPattern) {
+async function handlePatternSelection(selectedPattern, buttonElement) {
   // Normalize the primary pattern (in case database uses variant names)
   const primaryPattern = normalizePattern(currentProblem.primaryPattern);
   const acceptablePatterns = (currentProblem.acceptablePatterns ||
@@ -492,7 +542,7 @@ async function handlePatternSelection(selectedPattern) {
     await handleCorrectAnswer(selectedPattern);
   } else {
     // Wrong answer
-    handleWrongAnswer(selectedPattern);
+    handleWrongAnswer(selectedPattern, buttonElement);
   }
 }
 
@@ -507,23 +557,32 @@ function closeSidebar() {
 }
 
 /**
- * Handle correct answer
+ * Handle correct answer - show confirmation, then transition to green practice view
  */
 async function handleCorrectAnswer(selectedPattern) {
   const sidebar = document.querySelector('.pattern-pulse-sidebar');
   const quiz = sidebar.querySelector('.pattern-pulse-quiz');
 
-  // Get pattern-specific explanation or fallback to general explanation
-  let explanation = '';
-  if (currentProblem.patternExplanations && currentProblem.patternExplanations[selectedPattern]) {
-    explanation = currentProblem.patternExplanations[selectedPattern];
-  } else if (currentProblem.solution?.keyInsight) {
-    explanation = currentProblem.solution.keyInsight;
-  } else if (currentProblem.explanation) {
-    explanation = currentProblem.explanation;
+  // Save progress (only if not already in practice mode)
+  if (!isPracticeMode) {
+    const progressData = {
+      pattern: selectedPattern,
+      completed: true,
+      hintsUsed: hintsGiven,
+      wrongAttempts: wrongAttempts,
+      timestamp: Date.now()
+    };
+    await storage.saveProgress(currentProblem.slug, progressData);
+    currentProgress = progressData;
   }
 
-  // Show success message with pattern-specific explanation
+  // Remove shields
+  removeShields();
+
+  // Pin sidebar so it stays open
+  sidebar.classList.add('pinned');
+
+  // Show confirmation screen
   quiz.innerHTML = `
     <div class="quiz-success">
       <div class="success-icon">✓</div>
@@ -531,80 +590,57 @@ async function handleCorrectAnswer(selectedPattern) {
       <p class="success-message">
         <strong>${selectedPattern}</strong> is the right pattern!
       </p>
-      ${explanation ? `
-        <div class="solution-insight">
-          <p>${explanation}</p>
-        </div>
-      ` : ''}
       <button class="continue-button" id="continue-button">
         Continue
       </button>
     </div>
   `;
 
-  sidebar.querySelector('#continue-button').addEventListener('click', async () => {
-    // Save progress (including wrong attempts for strength calculation)
-    await storage.saveProgress(currentProblem.slug, {
-      pattern: selectedPattern,
-      completed: true,
-      hintsUsed: hintsGiven,
-      wrongAttempts: wrongAttempts,
-      timestamp: Date.now()
-    });
+  // Transition to green practice mode view
+  const transitionToGreen = () => {
+    sidebar.classList.remove('pinned');
+    sidebar.classList.add('completed');
 
-    // Remove shields and sidebar
-    removeShields();
-    closeSidebar();
-  });
+    // Hide panel smoothly
+    const panel = sidebar.querySelector('.pattern-pulse-panel');
+    if (panel) {
+      panel.style.opacity = '0';
+      panel.style.pointerEvents = 'none';
+    }
+
+    // Replace with practice mode sidebar
+    setTimeout(() => {
+      closeSidebar();
+      isPracticeMode = true;
+      quizShown = false;
+      showQuiz();
+    }, 300);
+  };
+
+  document.getElementById('continue-button').addEventListener('click', transitionToGreen);
+  sidebar.addEventListener('mouseleave', transitionToGreen, { once: true });
 }
 
 /**
- * Handle wrong answer
+ * Handle wrong answer - shake the button, no content shift
  */
-function handleWrongAnswer(selectedPattern) {
+function handleWrongAnswer(selectedPattern, buttonElement) {
   // Track wrong attempts
   wrongAttempts++;
 
-  const quiz = document.querySelector('.pattern-pulse-quiz');
   const tab = document.querySelector('.pattern-pulse-tab');
 
-  // Flash the tab red briefly for subtle feedback
+  // Flash the tab red briefly
   if (tab) {
     tab.classList.add('wrong-flash');
     setTimeout(() => tab.classList.remove('wrong-flash'), 600);
   }
 
-  // Remove existing feedback
-  const existingFeedback = quiz.querySelector('.wrong-feedback');
-  if (existingFeedback) {
-    existingFeedback.remove();
+  // Shake the clicked button
+  if (buttonElement) {
+    buttonElement.classList.add('wrong-shake');
+    setTimeout(() => buttonElement.classList.remove('wrong-shake'), 500);
   }
-
-  // Show feedback with option to dispute
-  const feedback = document.createElement('div');
-  feedback.className = 'wrong-feedback';
-  feedback.innerHTML = `
-    <span>Not quite. ${selectedPattern} isn't the optimal pattern here.</span>
-    <button class="feedback-dispute" title="Think this should be correct?">Disagree?</button>
-  `;
-
-  const patternsSection = quiz.querySelector('.quiz-patterns');
-  if (patternsSection) {
-    patternsSection.insertAdjacentElement('beforebegin', feedback);
-  }
-
-  // Auto-remove after 5 seconds (unless user interacts)
-  let autoRemoveTimeout = setTimeout(() => {
-    if (feedback.parentNode && !feedback.querySelector('.feedback-form-inline')) {
-      feedback.remove();
-    }
-  }, 5000);
-
-  // Handle dispute click - show form right under the feedback
-  feedback.querySelector('.feedback-dispute').addEventListener('click', () => {
-    clearTimeout(autoRemoveTimeout); // Prevent auto-remove
-    openFeedbackInline(feedback, selectedPattern);
-  });
 }
 
 /**
@@ -707,7 +743,7 @@ function showHint() {
 
 /**
  * Skip quiz and go straight to problem (no confirmation)
- * Tab stays visible but becomes muted/inactive
+ * Tab stays visible with skipped state panel
  */
 async function skipQuiz() {
   // Save as skipped
@@ -719,12 +755,56 @@ async function skipQuiz() {
   // Remove shields
   removeShields();
 
-  // Change sidebar to skipped state (muted, non-expandable)
-  const sidebar = document.querySelector('.pattern-pulse-sidebar');
-  if (sidebar) {
-    sidebar.classList.add('skipped');
-    sidebar.querySelector('.pattern-pulse-tab').title = 'PatternPulse - Skipped';
-  }
+  // Replace sidebar with skipped state
+  closeSidebar();
+  const sidebar = createSkippedSidebar();
+  document.body.appendChild(sidebar);
+}
+
+/**
+ * Create skipped state sidebar (gray tab, retry panel)
+ */
+function createSkippedSidebar() {
+  const sidebar = document.createElement('div');
+  sidebar.className = 'pattern-pulse-sidebar skipped';
+
+  sidebar.innerHTML = `
+    <div class="pattern-pulse-tab" title="PatternPulse - Skipped">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="6" cy="6" r="2.5" fill="#6b7280"/>
+        <circle cx="18" cy="6" r="2.5" fill="#9ca3af"/>
+        <circle cx="6" cy="18" r="2.5" fill="#9ca3af"/>
+        <circle cx="18" cy="18" r="2.5" fill="#6b7280"/>
+        <circle cx="12" cy="12" r="2.5" fill="#d1d5db"/>
+        <path d="M8 7L10.5 10M13.5 14L16 17M8 17L10.5 14M13.5 10L16 7" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="pattern-pulse-panel">
+      <div class="pattern-pulse-content skipped-content">
+        <div class="skipped-header">
+          <div class="skipped-icon">⏭</div>
+          <h3>Skipped</h3>
+        </div>
+        <p class="skipped-message">You skipped the pattern quiz for this problem.</p>
+        <button class="retry-button" id="retry-quiz-btn">
+          Try Again
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Add retry button listener
+  sidebar.querySelector('#retry-quiz-btn').addEventListener('click', async () => {
+    await storage.saveProgress(currentProblem.slug, {
+      skipped: false
+    });
+    // Reinitialize to show quiz
+    closeSidebar();
+    quizShown = false;
+    init();
+  });
+
+  return sidebar;
 }
 
 /**
@@ -831,10 +911,6 @@ function checkUrlChange() {
 
     // Close any existing sidebar
     closeSidebar();
-
-    // Remove any existing title badge
-    const existingBadge = document.querySelector('.pattern-pulse-title-badge');
-    if (existingBadge) existingBadge.remove();
 
     // Remove any existing shields (do it twice to catch any stragglers)
     document.querySelectorAll('.pattern-pulse-shield').forEach(el => {

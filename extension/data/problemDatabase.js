@@ -103,8 +103,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "The median splits elements into two equal halves. How can you partition two sorted arrays?",
-      "If you know how many elements should be on the left, can you binary search for the right partition point?",
-      "Binary search on the smaller array. For each partition, check if maxLeft <= minRight for both arrays."
+      "If you know how many elements should be on the left, can you efficiently find the right partition point by eliminating half the possibilities each time?",
+      "Focus on the smaller array. For each partition guess, check if maxLeft <= minRight for both arrays to validate it."
     ],
     "solution": {
       "approach": "Binary search on smaller array for partition point. Verify partition is valid when maxLeftA <= minRightB and maxLeftB <= minRightA.",
@@ -382,7 +382,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "If you fix one number, what problem does finding the other two become?",
       "After fixing nums[i], you need two numbers that sum to -nums[i]. Sound familiar?",
-      "Sort first. Then for each i, use two pointers on the right portion. Skip duplicate values."
+      "Sort first. Then for each i, scan from both ends of the remaining portion. Skip duplicate values."
     ],
     "solution": {
       "approach": "Sort. For each i, use two pointers (i+1, n-1) to find pairs summing to -nums[i]. Skip duplicates.",
@@ -405,8 +405,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "This is similar to 3Sum, but instead of finding exact target, you need to track how close you get. What do you need to keep track of?",
-      "If your current sum is less than target, which pointer should move to increase the sum? If greater than target?",
-      "Sort the array. For each i, use two pointers (left=i+1, right=n-1). Update closest when |sum-target| improves. Move left if sum<target, right if sum>target."
+      "If your current sum is less than target, which end should you move to increase the sum? If greater than target?",
+      "Sort the array. For each i, scan from both ends (i+1 and n-1). Update closest when |sum-target| improves. Move left if sum<target, right if sum>target."
     ],
     "solution": {
       "approach": "Sort array. For each element at i, use two pointers on remaining array. Track the sum closest to target. Move pointers based on comparison with target.",
@@ -433,7 +433,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Each digit maps to 3-4 letters (like a phone keypad). Store this mapping.",
       "For each digit, you need to try each of its possible letters.",
-      "Use recursion: process one digit at a time, append each possible letter, then recurse to next digit."
+      "Process one digit at a time. For each possible letter, build the combination and move to the next digit."
     ],
     "solution": {
       "approach": "Create digit-to-letters map. Backtrack through digits, for each trying all possible letters.",
@@ -457,7 +457,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "This extends the 3Sum pattern. If you fix one more element, what does the remaining problem become?",
       "With two elements fixed (outer loops i, j), you need two more elements summing to target - nums[i] - nums[j]. What technique solves 2Sum efficiently on sorted data?",
-      "Sort array. Two outer loops fix first two elements. Inner two-pointer search finds the remaining two. Skip duplicates at each of the four positions."
+      "Sort array. Two outer loops fix first two elements. Scan from both ends to find the remaining two. Skip duplicates at each of the four positions."
     ],
     "solution": {
       "approach": "Sort array. Outer loop i from 0 to n-4. Inner loop j from i+1 to n-3. Two pointers left=j+1, right=n-1 find pairs. Skip duplicates at all four positions.",
@@ -483,9 +483,9 @@ const PROBLEM_DATABASE = {
       "Linked List": "The fast/slow pointer technique lets you find position from end without knowing list length."
     },
     "hints": [
-      "Nth from end means: when fast pointer reaches end, slow pointer is at target.",
-      "How far apart should two pointers be so when one reaches end, the other is at nth from end?",
-      "Gap of n between pointers. Use dummy node to handle edge case of removing head."
+      "Nth from end means: when one marker reaches the end, another marker should be at the target.",
+      "How far apart should two markers be so when one reaches the end, the other is at the nth from end?",
+      "A gap of n between markers. Use a dummy node to handle the edge case of removing the head."
     ],
     "solution": {
       "approach": "Dummy node -> head. Fast moves n+1 ahead, then both move until fast is null. Remove slow.next.",
@@ -592,8 +592,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "You need to repeatedly find the minimum among k current elements. What data structure helps?",
-      "A min-heap can give you the minimum in O(log k) time.",
-      "Push all list heads to heap. Pop minimum, add to result, push its next node to heap."
+      "What if you could always get the smallest element in O(log k) time, even as elements change?",
+      "Keep all current list heads organized. Pop the smallest, add it to result, then add its next node back."
     ],
     "solution": {
       "approach": "Min-heap of size k. Pop smallest, add to result, push popped node's next to heap.",
@@ -756,7 +756,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "All words have the same length. What is the total length of a valid concatenation? How many starting positions could work?",
-      "Store word frequencies in a hash map. For a given window, extract each word-length chunk and compare against required frequencies.",
+      "Store word frequencies. For a given window, extract each word-length chunk and compare against required frequencies.",
       "Optimize: instead of checking every position, try starting offsets 0 to word_len-1. Slide window by word_len each time, adding/removing one word."
     ],
     "solution": {
@@ -806,8 +806,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "How do you know when a parentheses substring becomes invalid? When can you update the maximum valid length?",
-      "Use a stack to track indices of '(' that haven't been matched yet. What should you do when you see a ')'?",
-      "Stack approach: push -1 initially as base. On '(' push index. On ')' pop; if empty push current as new base, else max length = i - stack.top()."
+      "Track indices of '(' that haven't been matched yet. What should you do when you see a ')'?",
+      "Push -1 initially as base. On '(' push index. On ')' pop; if empty push current as new base, else max length = i - top."
     ],
     "solution": {
       "approach": "Stack of indices starting with -1. '(' pushes its index. ')' pops; if stack empty push i as new base, else compute length as i - stack.top() and update max.",
@@ -852,7 +852,7 @@ const PROBLEM_DATABASE = {
       "Binary Search": "Run two binary searches: one to find leftmost occurrence (keep going left when equal), one to find rightmost (keep going right when equal)."
     },
     "hints": [
-      "A single binary search finds any occurrence. How do you find the first occurrence specifically? The last?",
+      "Searching finds any occurrence. How do you find the first occurrence specifically? The last?",
       "When you find target, don't stop. To find first, continue searching left half. To find last, continue searching right half.",
       "For leftmost: when nums[mid] >= target, go left (right = mid-1), but record mid if equal. For rightmost: when nums[mid] <= target, go right."
     ],
@@ -874,8 +874,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Where would you insert a number in a sorted array to keep it sorted? It's the position of the first element >= target.",
-      "Binary search naturally converges to the insertion point when the target isn't found. What does the left pointer point to when the loop ends?",
-      "Standard binary search. When loop ends without finding target, left pointer is at the insertion position (first element >= target)."
+      "Searching naturally converges to the insertion point when the target isn't found. What does the left index point to when the loop ends?",
+      "Halve the search space repeatedly. When the loop ends without finding target, the left index is at the insertion position (first element >= target)."
     ],
     "solution": {
       "approach": "Binary search: while left <= right, check mid. If found return mid. If target < nums[mid], right = mid-1. Else left = mid+1. Return left.",
@@ -924,8 +924,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "For each empty cell, what digits are valid (not already in same row, column, or 3x3 box)?",
-      "Try placing a valid digit, then recursively solve. If you reach a dead end, what should you do?",
-      "Find next empty cell. Try 1-9. If valid (check row/col/box), place and recurse. If recursion returns false, remove digit and try next. If all fail, return false."
+      "Try placing a valid digit, then continue solving. If you reach a dead end, what should you do?",
+      "Find next empty cell. Try 1-9. If valid (check row/col/box), place and continue. If that path fails, remove digit and try next. If all fail, return false."
     ],
     "solution": {
       "approach": "Backtracking: find empty cell, try digits 1-9. For each valid digit, place and recurse. On failure, backtrack. Use sets/arrays for O(1) validity checking.",
@@ -949,7 +949,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Start with '1'. Each term describes the previous by counting consecutive groups. '111221' has one 1, one 1, two 2s, one 1.",
       "To generate next term, scan current term grouping consecutive identical digits. For each group, output 'count' + 'digit'.",
-      "Use two pointers: i starts at 0, j finds end of run of same digit. Append (j-i) + str[i] to result. Set i = j and repeat."
+      "Use two indices: i starts at 0, j finds end of run of same digit. Append (j-i) + str[i] to result. Set i = j and repeat."
     ],
     "solution": {
       "approach": "Start with '1'. Iterate n-1 times. For each iteration, scan string grouping consecutive digits, outputting count + digit for each group.",
@@ -973,7 +973,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Can use same number multiple times. When should you stop adding?",
-      "Build combination by adding candidates. If you overshoot target, backtrack.",
+      "Build combination by adding candidates. If you overshoot target, undo and try other options.",
       "To avoid duplicates like [2,3] and [3,2], only consider candidates from current index onward."
     ],
     "solution": {
@@ -1023,7 +1023,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "The answer must be between 1 and n+1 (where n is array length). Why? What if array has all of 1 to n?",
-      "Can you use the array itself as a hash table? What if position i stores value i+1?",
+      "Can you use the array itself as storage? What if position i stores value i+1?",
       "Cyclic sort: while nums[i] is in valid range and not in correct position, swap it to its correct place. Then scan for first position where nums[i] != i+1."
     ],
     "solution": {
@@ -1105,8 +1105,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "'?' matches exactly one character. '*' matches zero or more of any characters. How do these differ in your state transitions?",
-      "For DP: if pattern[j-1] is '*', dp[i][j] is true if dp[i][j-1] (star matches empty) OR dp[i-1][j] (star matches one more char).",
-      "dp[i][j]: if p[j-1]='*', take OR of dp[i][j-1] (match nothing) and dp[i-1][j] (match current char in s). If p[j-1]='?' or matches s[i-1], use dp[i-1][j-1]."
+      "If pattern[j-1] is '*', the match is valid if star matches empty (check i,j-1) OR star matches one more char (check i-1,j).",
+      "If p[j-1]='*', check (i,j-1) for matching nothing OR (i-1,j) for matching current char in s. If p[j-1]='?' or matches s[i-1], check (i-1,j-1)."
     ],
     "solution": {
       "approach": "DP table dp[i][j] for s[0:i] matches p[0:j]. For '*', check dp[i][j-1] || dp[i-1][j]. For '?' or char match, check dp[i-1][j-1].",
@@ -1135,7 +1135,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Find minimum jumps to reach the end.",
-      "Greedy: from current range, find the farthest you can reach. That becomes next range.",
+      "From the current range, find the farthest you can reach. That becomes your next range boundary.",
       "When you must take a jump (reached end of current range), increment jump count."
     ],
     "solution": {
@@ -1185,7 +1185,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Unlike Permutations I, input has duplicates. [1,1,2] shouldn't give [1,1,2] twice. How do you avoid duplicate permutations?",
       "Sort the array. Then when building permutations, skip a number if it equals the previous AND the previous wasn't used in this branch.",
-      "Backtrack with sorted array. For each position, skip nums[i] if nums[i] == nums[i-1] and !used[i-1]. This prevents picking the same value twice at the same level."
+      "With sorted array, for each position, skip nums[i] if nums[i] == nums[i-1] and !used[i-1]. This prevents picking the same value twice at the same level."
     ],
     "solution": {
       "approach": "Sort. Backtrack with used[] array. Skip nums[i] if it equals nums[i-1] and nums[i-1] isn't used (meaning we already tried this value at this level).",
@@ -1236,7 +1236,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "How can you create a 'signature' that's the same for all anagrams?",
       "If you sort 'eat' and 'tea', what do you get?",
-      "Use this signature as a hash map key to group words together."
+      "Use this signature as a key to group words together."
     ],
     "solution": {
       "approach": "For each word, create a key (sorted string or char frequency tuple). Map key -> list of words.",
@@ -1591,7 +1591,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "This is Unique Paths with blocked cells. What's the path count for a cell with an obstacle?",
-      "If there's an obstacle, dp[i][j] = 0. Otherwise, same formula: dp[i][j] = dp[i-1][j] + dp[i][j-1].",
+      "If there's an obstacle, that cell has 0 paths. Otherwise, same formula: paths to cell = paths from above + paths from left.",
       "First row/column: if obstacle encountered, all cells after it have 0 paths (can't go around obstacles on edge)."
     ],
     "solution": {
@@ -1612,7 +1612,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "You can only move right or down. To reach cell (i,j) with minimum cost, you must come from either (i-1,j) or (i,j-1).",
-      "dp[i][j] = cost at (i,j) + min(cost to reach cell above, cost to reach cell to left).",
+      "Min cost at (i,j) = cost at (i,j) + min(cost to reach cell above, cost to reach cell to left).",
       "First row: can only come from left. First column: can only come from top. Initialize these first, then fill rest of grid."
     ],
     "solution": {
@@ -1687,7 +1687,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Binary addition is like decimal but base 2. 1+1=10 in binary (sum=0, carry=1). How do you handle carry?",
       "Start from rightmost digits. Add them plus carry. Result digit = sum % 2, new carry = sum / 2.",
-      "Use two pointers from end of each string. While either string has digits or carry exists, compute sum % 2 and sum / 2. Build result in reverse."
+      "Use two indices from end of each string. While either string has digits or carry exists, compute sum % 2 and sum / 2. Build result in reverse."
     ],
     "solution": {
       "approach": "Two pointers from end of strings. While i>=0 or j>=0 or carry: sum = a[i] + b[j] + carry, append sum%2, carry = sum/2. Reverse result.",
@@ -1733,8 +1733,8 @@ const PROBLEM_DATABASE = {
       "Math": "Newton's method: start with guess, iterate guess = (guess + x/guess) / 2 until converged."
     },
     "hints": [
-      "You need the largest integer k where k^2 <= x. How can binary search help find this boundary?",
-      "Binary search on answer: if mid^2 <= x, mid could be the answer (search right for larger). If mid^2 > x, search left.",
+      "You need the largest integer k where k^2 <= x. How can you find this boundary by eliminating half the search space each time?",
+      "Search on the answer: if mid^2 <= x, mid could be the answer (search right for larger). If mid^2 > x, search left.",
       "Search range [0, x]. While left <= right: if mid*mid <= x, record mid and search right (left = mid+1). Else search left (right = mid-1)."
     ],
     "solution": {
@@ -1779,9 +1779,9 @@ const PROBLEM_DATABASE = {
       "Stack": "Split path by '/'. For each component: '.' or empty = skip, '..' = pop stack (go up), else push to stack. Join stack with '/' for result."
     },
     "hints": [
-      "'.' means current directory (stay). '..' means parent directory (go up). How do you handle going up? What data structure helps?",
-      "Split by '/', process each part. '.' and '' do nothing. '..' pops the stack (if not empty). Anything else gets pushed.",
-      "Stack of directory names. Split on '/'. For each part: skip '.' and empty, pop for '..', push otherwise. Result: '/' + stack.join('/')."
+      "'.' means current directory (stay). '..' means parent directory (go up). How do you handle going up? What data structure helps with 'last in, first out' order?",
+      "Split by '/', process each part. '.' and '' do nothing. '..' removes the last directory (if any). Anything else gets added.",
+      "Keep a list of directory names. Split on '/'. For each part: skip '.' and empty, remove last for '..', add otherwise. Result: '/' + join('/')."
     ],
     "solution": {
       "approach": "Split path by '/'. Use stack: skip '.' and empty, pop for '..', push directories. Join with '/' and prepend '/'.",
@@ -1807,7 +1807,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Three operations: insert, delete, replace. What's the minimum to transform word1 to word2?",
       "If last characters match, no operation needed there. If not, try all three operations.",
-      "Insert = dp[i][j-1], Delete = dp[i-1][j], Replace = dp[i-1][j-1]. Take min and add 1."
+      "Insert uses result from (i, j-1), Delete uses (i-1, j), Replace uses (i-1, j-1). Take min and add 1."
     ],
     "solution": {
       "approach": "dp[i][j] = dp[i-1][j-1] if match, else 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]).",
@@ -1858,7 +1858,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Each row is sorted, and first element of each row > last element of previous row.",
       "If you 'flattened' the matrix into one array, it would be fully sorted.",
-      "Binary search on virtual 1D array. Convert 1D index to 2D: row = idx/cols, col = idx%cols."
+      "Search on virtual 1D array. Convert 1D index to 2D: row = idx/cols, col = idx%cols."
     ],
     "solution": {
       "approach": "Binary search treating matrix as 1D array. Convert indices: matrix[mid/cols][mid%cols].",
@@ -1909,7 +1909,7 @@ const PROBLEM_DATABASE = {
       "Hash Map": "Use hashmap to count required chars. Window is valid when all counts are satisfied."
     },
     "hints": [
-      "Use sliding window. When is the window valid?",
+      "Use a window that expands and contracts. When is the window valid?",
       "Track character counts needed from t. Window is valid when all counts are met.",
       "Expand right until valid, then shrink left while maintaining validity to find minimum."
     ],
@@ -1932,7 +1932,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Combinations differ from permutations - order doesn't matter. [1,2] and [2,1] are the same combination.",
       "To avoid duplicates, only pick elements with index >= current start. After picking nums[i], next call starts at i+1.",
-      "Backtrack: at each position, try adding each remaining number (from start to n). When path length = k, record it and return."
+      "At each position, try adding each remaining number (from start to n). When path length = k, record it and return."
     ],
     "solution": {
       "approach": "Backtrack with start index. For i from start to n: add i to path, recurse with start=i+1, remove i. When path.length = k, add copy to result.",
@@ -1960,7 +1960,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Each element is either in the subset or not. That's a binary choice.",
       "Start empty. For each element, you can add it or skip it. Explore both paths.",
-      "Backtracking: add element, recurse, remove element (backtrack), recurse without it."
+      "Add element, explore further, then remove element to try the 'skip' path."
     ],
     "solution": {
       "approach": "Backtrack: for index i, add nums[i] to current, recurse, then remove it and recurse again (or iterate from i).",
@@ -1986,9 +1986,9 @@ const PROBLEM_DATABASE = {
       "DFS": "Explore paths in the grid matching the word. Backtrack when path doesn't match."
     },
     "hints": [
-      "Start DFS from any cell matching word[0]. Explore adjacent cells for word[1], etc.",
+      "Start from any cell matching word[0]. Explore adjacent cells for word[1], etc.",
       "Need to avoid revisiting cells in current path. How to track this?",
-      "Mark cell as visited (e.g., change to '#'), recurse, then restore original value."
+      "Mark cell as visited (e.g., change to '#'), explore neighbors, then restore original value."
     ],
     "solution": {
       "approach": "For each cell, if matches word[0], DFS trying to match rest. Mark visited, explore 4 directions, backtrack.",
@@ -2073,7 +2073,7 @@ const PROBLEM_DATABASE = {
       "Linked List": "Sorted list means duplicates are adjacent. For each node, if curr.val == curr.next.val, skip next by setting curr.next = curr.next.next."
     },
     "hints": [
-      "List is sorted, so duplicates are consecutive. How do you remove a node from a linked list?",
+      "List is sorted, so duplicates are consecutive. How do you skip over a node?",
       "To remove the next node, set curr.next = curr.next.next. Only advance curr if no duplicate was found.",
       "While curr and curr.next exist: if equal values, skip next node. Otherwise, advance curr."
     ],
@@ -2100,8 +2100,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "For each bar, you need to know how far left and right it can extend.",
-      "A bar can extend until it hits a shorter bar. Use stack to track previous shorter bars.",
-      "Maintain increasing stack of indices. When current < stack top, pop and calculate area."
+      "A bar can extend until it hits a shorter bar. How can you track previous shorter bars efficiently?",
+      "Maintain increasing sequence of indices. When current < the last value, process and calculate area."
     ],
     "solution": {
       "approach": "Monotonic increasing stack of indices. On smaller bar, pop and compute area using width from indices.",
@@ -2173,7 +2173,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Two strings are scrambles if: same chars AND exists a split where substrings are scrambles (possibly swapped).",
       "For split at position k: either s1[0:k] scrambles to s2[0:k] AND s1[k:n] to s2[k:n], OR s1[0:k] to s2[n-k:n] AND s1[k:n] to s2[0:n-k].",
-      "Early termination: if sorted chars don't match, return false. Try all k from 1 to n-1. Memoize (s1, s2) pairs."
+      "Early termination: if sorted chars don't match, return false. Try all k from 1 to n-1. Cache (s1, s2) pairs to avoid redundant work."
     ],
     "solution": {
       "approach": "Recursion with memo. Check char counts match first. For each split k, check non-swapped and swapped configurations recursively.",
@@ -2270,7 +2270,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "At each position, you can decode 1 digit or 2 digits (if valid).",
       "Valid single digit: 1-9. Valid two digits: 10-26.",
-      "dp[i] = dp[i-1] (if single digit valid) + dp[i-2] (if two digits valid)."
+      "Ways to decode up to position i = ways from (i-1) if single digit valid, plus ways from (i-2) if two digits valid."
     ],
     "solution": {
       "approach": "DP where dp[i] = ways to decode first i chars. Add dp[i-1] if s[i-1] is 1-9, add dp[i-2] if s[i-2..i-1] is 10-26.",
@@ -2312,7 +2312,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Valid IP: 4 segments, each 0-255, no leading zeros. Total length must be 4-12 characters.",
       "At each position, try taking 1, 2, or 3 characters for the current segment. Validate each segment (0-255, no leading zero).",
-      "Backtrack: if we have 4 segments and used all characters, record result. For each segment length (1-3), if valid, recurse. Prune early if remaining chars can't fit remaining segments."
+      "If we have 4 segments and used all characters, record result. For each segment length (1-3), if valid, continue building. Prune early if remaining chars can't fit remaining segments."
     ],
     "solution": {
       "approach": "Backtrack trying segment lengths 1-3. Validate: no leading zeros (unless '0'), value <= 255. When 4 segments built and string exhausted, add to results.",
@@ -2337,8 +2337,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Inorder means: visit left subtree, then current node, then right subtree. This gives sorted order for BSTs.",
-      "Recursive solution is straightforward. For iterative, how can a stack help simulate the recursive calls?",
-      "Iterative: go left as far as possible, pushing nodes. Pop, add to result, then move right. Repeat until stack empty and no current node."
+      "The straightforward solution uses function calls. For iterative, what data structure can simulate the call order?",
+      "Iterative: go left as far as possible, saving nodes. Remove last saved, add to result, then move right. Repeat until nothing saved and no current node."
     ],
     "solution": {
       "approach": "Recursive: inorder(left), add root.val, inorder(right). Iterative: push all lefts, pop and record, go right, repeat.",
@@ -2386,7 +2386,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "If root is at position i (1-indexed), left subtree has i-1 nodes, right subtree has n-i nodes. How do you combine these?",
       "Total BSTs with root at i = (BSTs with i-1 nodes) * (BSTs with n-i nodes). Sum over all positions i from 1 to n.",
-      "dp[0] = dp[1] = 1. dp[n] = sum of dp[i-1] * dp[n-i] for i from 1 to n. This is the Catalan number formula."
+      "Base: 0 or 1 nodes gives 1 tree. For n nodes: sum of (trees with i-1 nodes) * (trees with n-i nodes) for i from 1 to n."
     ],
     "solution": {
       "approach": "DP: dp[i] = unique BSTs with i nodes. dp[n] = sum(dp[j-1] * dp[n-j]) for j in [1,n]. Base: dp[0] = dp[1] = 1.",
@@ -2411,8 +2411,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "s3[k] must come from either s1 or s2. Track positions in both.",
-      "dp[i][j] = true if first i chars of s1 and first j chars of s2 can form first i+j chars of s3.",
-      "Transition: dp[i][j] = (s1[i-1]==s3[i+j-1] && dp[i-1][j]) || (s2[j-1]==s3[i+j-1] && dp[i][j-1])."
+      "Can first i chars of s1 and first j chars of s2 interleave to form first i+j chars of s3?",
+      "Check: if s1[i-1] matches s3[i+j-1] and previous state (i-1,j) was valid, OR if s2[j-1] matches and (i,j-1) was valid."
     ],
     "solution": {
       "approach": "2D DP. dp[i][j] true if s1[0..i-1] and s2[0..j-1] interleave to s3[0..i+j-1]. Check both transitions.",
@@ -2515,8 +2515,8 @@ const PROBLEM_DATABASE = {
       "DFS": "Track depth parameter, add node value to result[depth]. Pre-order traversal maintains left-to-right order."
     },
     "hints": [
-      "Level order = all nodes at depth 1, then depth 2, etc. This is BFS.",
-      "Use a queue. Process all nodes currently in queue (one level), adding their children.",
+      "Level order = all nodes at depth 1, then depth 2, etc. Process layer by layer.",
+      "Use a structure that lets you process nodes in the order they were added, while adding their children.",
       "Track level size before processing to know when one level ends and next begins."
     ],
     "solution": {
@@ -2546,7 +2546,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Depth = number of nodes on longest path from root to leaf.",
       "For any node, its depth contribution is 1 + the deeper of its two subtrees.",
-      "Recursive: return 1 + max(maxDepth(left), maxDepth(right)). Base: null returns 0."
+      "For each node: return 1 + max(maxDepth(left), maxDepth(right)). Base: null returns 0."
     ],
     "solution": {
       "approach": "DFS: if null return 0, else return 1 + max(maxDepth(left), maxDepth(right)).",
@@ -2625,8 +2625,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "For each character in s, you can either use it to match t or skip it.",
-      "If s[i] == t[j], you can match them (dp[i-1][j-1]) or skip s[i] (dp[i-1][j]).",
-      "If s[i] != t[j], you must skip s[i], so dp[i][j] = dp[i-1][j]."
+      "If s[i] == t[j], you can match them (use result from i-1,j-1) or skip s[i] (use i-1,j).",
+      "If s[i] != t[j], you must skip s[i], so result at (i,j) = result at (i-1,j)."
     ],
     "solution": {
       "approach": "2D DP. If chars match: dp[i][j] = dp[i-1][j-1] + dp[i-1][j]. Else: dp[i][j] = dp[i-1][j].",
@@ -2767,7 +2767,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "O's connected to border cannot be captured. Only interior O's get flipped.",
       "Instead of finding captured regions, find regions that are NOT captured.",
-      "DFS/BFS from all border O's. Mark them. Everything else that's O gets captured."
+      "Explore from all border O's. Mark them as safe. Everything else that's O gets captured."
     ],
     "solution": {
       "approach": "Mark border-connected O's as safe (e.g., change to 'S'). Flip remaining O's to X. Change S back to O.",
@@ -2794,9 +2794,9 @@ const PROBLEM_DATABASE = {
       "Dynamic Programming": "Precompute palindrome table with DP, then backtrack to find partitions."
     },
     "hints": [
-      "At each position, try all possible first palindromes, then recurse on the rest.",
+      "At each position, try all possible first palindromes, then continue with the rest.",
       "How do you check if a substring is a palindrome efficiently?",
-      "You can precompute: dp[i][j] = true if s[i..j] is palindrome. Or check on the fly with two pointers."
+      "You can precompute palindrome status for all substrings. Or check on the fly by comparing from both ends."
     ],
     "solution": {
       "approach": "Backtrack: try each prefix as first palindrome, recurse on suffix. Add partition when string exhausted.",
@@ -2938,7 +2938,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Can the string be broken into dictionary words?",
       "If s[0:i] can be segmented AND s[i:j] is a word, then s[0:j] can be segmented.",
-      "dp[i] = true if there exists j where dp[j] is true and s[j:i] is in dictionary."
+      "Can we segment s[0:i]? Yes if there exists j where s[0:j] can be segmented and s[j:i] is in dictionary."
     ],
     "solution": {
       "approach": "dp[0] = true. For i from 1 to n: for each j from 0 to i: if dp[j] and s[j:i] in wordDict, dp[i] = true.",
@@ -3022,7 +3022,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "LRU = Least Recently Used. Need to track usage order and evict oldest when full.",
       "Need O(1) lookup by key AND O(1) update of 'most recently used'. What combination works?",
-      "Hash map for lookup, doubly linked list for ordering. Move accessed items to front."
+      "Use a map for key lookup and a doubly-linked structure for ordering. Move accessed items to front."
     ],
     "solution": {
       "approach": "HashMap<key, node> + doubly linked list. On access: move to front. On insert when full: remove tail.",
@@ -3047,8 +3047,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "In RPN, operators come after their operands: '3 4 +' means 3 + 4.",
-      "Use a stack. When you see a number, push it.",
-      "When you see an operator, pop two numbers, apply the operator, push the result."
+      "Use a LIFO structure. When you see a number, add it.",
+      "When you see an operator, remove two numbers, apply the operator, add the result back."
     ],
     "solution": {
       "approach": "Stack of numbers. On number: push. On operator: pop b, pop a, push (a op b).",
@@ -3149,9 +3149,9 @@ const PROBLEM_DATABASE = {
       "Stack": "Use two stacks or store pairs (value, currentMin). Track minimum at each level so pop doesn't lose min info."
     },
     "hints": [
-      "Regular stack gives O(1) push/pop. How do you also get O(1) min?",
-      "When you push, the min might change. When you pop, you need to know the previous min.",
-      "Store the current minimum alongside each element, or use a separate min stack."
+      "A regular LIFO structure gives O(1) push/pop. How do you also get O(1) min?",
+      "When you add, the min might change. When you remove, you need to know the previous min.",
+      "Store the current minimum alongside each element, or use a separate structure tracking mins."
     ],
     "solution": {
       "approach": "Each stack entry stores (value, minSoFar). Min is always top entry's minSoFar.",
@@ -3312,8 +3312,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Right side view = rightmost node at each level.",
-      "BFS level by level - what's the last node at each level?",
-      "Or DFS right-to-left: first node you see at each new depth is the answer for that level."
+      "Process level by level - what's the last node at each level?",
+      "Or explore right-to-left, going deep before wide: first node you see at each new depth is the answer for that level."
     ],
     "solution": {
       "approach": "BFS: for each level, add the last node's value to result. Or DFS right-first, track depth.",
@@ -3343,7 +3343,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "An island is a connected group of '1's. How do you count separate groups?",
       "When you find a '1', you've found a new island. Mark all connected '1's as visited.",
-      "Increment count each time you start a DFS/BFS from an unvisited '1'."
+      "Increment count each time you start exploring from an unvisited '1'."
     ],
     "solution": {
       "approach": "Iterate grid. When finding unvisited '1', increment count and DFS/BFS to mark entire island visited.",
@@ -3431,7 +3431,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Courses with prerequisites form a directed graph. What makes it impossible to complete all?",
       "Impossible if there's a cycle: A requires B, B requires C, C requires A.",
-      "Detect cycle via DFS (tracking 'in current path') or BFS topological sort."
+      "Detect if there's a cycle by exploring the graph and tracking nodes in the current path."
     ],
     "solution": {
       "approach": "DFS cycle detection: 3 states per node. Or BFS: count incoming edges, process nodes with 0 incoming, check if all processed.",
@@ -3486,7 +3486,7 @@ const PROBLEM_DATABASE = {
       "BFS": "BFS from nodes with 0 in-degree. Add to order. Decrement neighbors' in-degree."
     },
     "hints": [
-      "This is topological sort - order nodes so all edges point forward.",
+      "You need to order courses so all prerequisites come before dependents.",
       "Start with courses that have no prerequisites (in-degree 0).",
       "Process them, remove their edges, find new courses with in-degree 0. Repeat."
     ],
@@ -3515,9 +3515,9 @@ const PROBLEM_DATABASE = {
       "DFS": "DFS through trie. On '.', recursively try all 26 children."
     },
     "hints": [
-      "Use a trie for efficient prefix operations.",
-      "addWord is standard trie insert. search is where it gets interesting.",
-      "For '.', you need to try all possible characters at that position. Use DFS/backtracking."
+      "Use a prefix tree structure for efficient prefix operations.",
+      "addWord is standard prefix tree insert. search is where it gets interesting.",
+      "For '.', you need to try all possible characters at that position. Explore all branches."
     ],
     "solution": {
       "approach": "Trie with search that handles '.'. On '.', recursively search all children. On letter, follow that path.",
@@ -3545,8 +3545,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Word Search I for each word would be O(words * m * n * 4^L). Can you do better?",
-      "Build a trie from all words. Search the board once, following the trie.",
-      "At each cell, only continue if current path exists in trie. This prunes many paths."
+      "Build a prefix tree from all words. Search the board once, following the prefix tree.",
+      "At each cell, only continue if current path exists in the prefix structure. This prunes many paths."
     ],
     "solution": {
       "approach": "Build trie of words. DFS from each cell, following trie. When word found, add to result. Mark visited cells.",
@@ -3599,8 +3599,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Kth largest = (n-k+1)th smallest. How can you find this efficiently?",
-      "A min-heap of size k keeps the k largest elements. What's at the top?",
-      "Add elements to heap. If size > k, remove smallest. Finally, top is kth largest."
+      "A structure that always gives you the smallest element, kept to size k, holds the k largest. What's at the top?",
+      "Add elements. If size > k, remove smallest. Finally, the smallest of the k largest is your answer."
     ],
     "solution": {
       "approach": "Min-heap of size k. Add all elements, remove if size > k. Result is heap top.",
@@ -3625,8 +3625,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Similar to Combination Sum, but exactly k numbers, each from 1-9, no repeats.",
-      "Backtrack through choices. Track count and remaining sum.",
-      "Start each recursion from the next number to avoid duplicates."
+      "Try choices, undo when needed. Track count and remaining sum.",
+      "Start each call from the next number to avoid duplicates."
     ],
     "solution": {
       "approach": "Backtrack with start index (1-9), remaining count k, remaining sum n. Add when k=0 and n=0.",
@@ -3682,7 +3682,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Inverting means swapping left and right children at every node.",
       "If you invert the subtrees first, then swap them, does order matter?",
-      "Recursively: invert(left), invert(right), then swap left and right."
+      "For each node: invert(left), invert(right), then swap left and right."
     ],
     "solution": {
       "approach": "DFS: for each node, swap left and right children, recursively invert both subtrees.",
@@ -3759,7 +3759,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "LCA: deepest node that has both p and q as descendants (node can be its own descendant).",
-      "Recursively: if current is p or q, return it. Search left and right subtrees.",
+      "If current is p or q, return it. Search left and right subtrees.",
       "If both subtrees return non-null, current node is LCA. Else return whichever is non-null."
     ],
     "solution": {
@@ -3899,7 +3899,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Minimum rooms = maximum number of concurrent meetings.",
       "Sort by start time. Track end times of ongoing meetings.",
-      "Min-heap of end times. For each meeting: if earliest end <= new start, reuse that room. Always add new end."
+      "Track end times so you can always get the earliest. For each meeting: if earliest end <= new start, reuse that room. Always add new end."
     ],
     "solution": {
       "approach": "Sort by start. Min-heap of end times. For each meeting, pop if top <= start (room freed). Push new end. Max heap size = rooms.",
@@ -3927,7 +3927,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "A tree with n nodes has exactly n-1 edges and is connected.",
       "Also, a tree has no cycles.",
-      "Union-Find: process edges. If edge connects same component, it's a cycle. After, check all in one component."
+      "Process edges. If an edge connects nodes already in the same group, it creates a cycle. Finally check all nodes are in one group."
     ],
     "solution": {
       "approach": "Check edges = n-1. Union-Find: if union returns false (same component), there's a cycle. Check one component at end.",
@@ -3982,7 +3982,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Compare adjacent words to find character ordering.",
       "First differing char in adjacent words tells you: earlier char < later char.",
-      "Build directed graph. Topological sort. If cycle exists, no valid order."
+      "Build directed graph. Order nodes so all edges point forward. If cycle exists, no valid order."
     ],
     "solution": {
       "approach": "Compare adjacent words for ordering. Build graph. Topological sort (Kahn's). Detect cycle. Return order.",
@@ -4031,7 +4031,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Move all non-zero elements to the front, maintaining relative order.",
-      "Two pointers: slow marks where next non-zero should go, fast finds non-zeros.",
+      "Use two indices: slow marks where next non-zero should go, fast finds non-zeros.",
       "When fast finds non-zero, swap with slow position, advance both. Else just advance fast."
     ],
     "solution": {
@@ -4056,8 +4056,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Each room should have distance to nearest gate.",
-      "BFS from single source gives distance from that source. What about multiple sources?",
-      "Multi-source BFS: start from all gates simultaneously. First visit to each room gives shortest distance."
+      "Starting from a single source gives distance from that source. What about multiple sources?",
+      "Multi-source approach: start from all gates simultaneously. First visit to each room gives shortest distance."
     ],
     "solution": {
       "approach": "Queue all gates. BFS: for each cell, if neighbor is INF, set to distance+1 and queue.",
@@ -4085,7 +4085,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "There are n+1 numbers in range [1,n]. By pigeonhole, there's a duplicate.",
-      "Think of array as linked list: value at index i points to next index.",
+      "Treat the array as a sequence of jumps: value at index i tells you the next index to visit.",
       "A duplicate means two indices point to the same value - that's a cycle! Use cycle detection."
     ],
     "solution": {
@@ -4111,7 +4111,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Median is the middle element. Need quick access to middle as elements are added.",
       "What if you kept the smaller half in one structure and larger half in another?",
-      "Max-heap for small half (gives max of small), min-heap for large half (gives min of large). Balance sizes."
+      "One structure that gives the max of small half, another that gives the min of large half. Balance sizes."
     ],
     "solution": {
       "approach": "Max-heap for lower half, min-heap for upper half. Keep sizes balanced (differ by at most 1). Median from top(s).",
@@ -4140,7 +4140,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "You need to encode the tree structure in a string, then reconstruct it.",
       "Preorder traversal with null markers is a common approach.",
-      "Serialize: 1,2,null,null,3,4,null,null,5,null,null. Use queue/recursion to deserialize."
+      "Serialize: 1,2,null,null,3,4,null,null,5,null,null. Process tokens in order to deserialize."
     ],
     "solution": {
       "approach": "Serialize with preorder DFS, using 'null' for empty nodes. Deserialize by reading tokens and recursing.",
@@ -4168,7 +4168,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "For each position i, what's the longest increasing subsequence that ends at i?",
       "LIS ending at i = 1 + max(LIS ending at any j < i where nums[j] < nums[i]).",
-      "O(n^2) DP works. For O(n log n), maintain tails array and use binary search."
+      "O(n^2) approach works. For O(n log n), maintain tails array and search for position efficiently."
     ],
     "solution": {
       "approach": "O(n^2): dp[i] = max(dp[j] + 1) for all j < i where nums[j] < nums[i]. Answer = max(dp).",
@@ -4193,8 +4193,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "At each day, you can be in one of three states: holding stock, cooling down, or ready to buy.",
-      "holding[i] = max(holding[i-1], notHolding[i-1] - price)",
-      "notHolding[i] = max(notHolding[i-1], cooldown[i-1]). cooldown[i] = holding[i-1] + price."
+      "Holding today = max(held yesterday, bought today from ready state)",
+      "Ready today = max(ready yesterday, finished cooldown). Cooldown today = sold today."
     ],
     "solution": {
       "approach": "3 states: hold, sold (cooldown), ready. Transition: hold = max(hold, ready-price), sold = hold+price, ready = max(ready, sold).",
@@ -4220,7 +4220,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "If you think about which balloon to burst first, the subproblems aren't independent.",
       "Instead, think about which balloon to burst LAST in a range.",
-      "If balloon k is last in range (i,j), coins = dp[i][k] + dp[k][j] + nums[i]*nums[k]*nums[j]."
+      "If balloon k is last in range (i,j), coins = result[i][k] + result[k][j] + nums[i]*nums[k]*nums[j]."
     ],
     "solution": {
       "approach": "DP on ranges. dp[i][j] = max coins from (i,j). Try each k as last burst. Pad array with 1s at ends.",
@@ -4247,8 +4247,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "To make amount a, you can use any coin c where c <= a. Then you need to make amount a-c.",
-      "dp[a] = minimum of (dp[a-c] + 1) for all coins c.",
-      "Build up from amount 0. dp[0] = 0. For each amount, try each coin."
+      "Min coins for a = minimum of (min coins for a-c plus 1) for all coins c.",
+      "Build up from amount 0. Base case: 0 coins needed for amount 0. For each amount, try each coin."
     ],
     "solution": {
       "approach": "dp[0] = 0, dp[i] = infinity initially. For i from 1 to amount, for each coin: dp[i] = min(dp[i], dp[i-coin]+1).",
@@ -4276,8 +4276,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Count distinct connected components.",
-      "Union-Find: start with n components. Each edge merges two (if different).",
-      "Count components by counting unique roots (or track component count as you union)."
+      "Start with n components. Each edge merges two (if they're different).",
+      "Count components by counting unique roots (or track component count as you merge)."
     ],
     "solution": {
       "approach": "Union-Find: start with n components. For each edge, union. If roots different, decrement count. Return final count.",
@@ -4330,8 +4330,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "From each cell, you can move to adjacent cells with larger values.",
-      "DFS from each cell to find longest path. But this has overlapping subproblems.",
-      "Memoize! Once you compute longest path from a cell, store it."
+      "Explore from each cell to find longest path. But this has overlapping subproblems.",
+      "Cache results! Once you compute longest path from a cell, store it."
     ],
     "solution": {
       "approach": "DFS with memoization. For each cell, recursively find max of 1 + dfs(neighbor) for valid neighbors.",
@@ -4356,7 +4356,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "This is finding an Eulerian path - visit every edge exactly once.",
-      "Sort destinations lexicographically. Use DFS to visit edges.",
+      "Sort destinations lexicographically. Explore edges systematically.",
       "Add airport to result AFTER exploring all its edges (post-order). Reverse at end."
     ],
     "solution": {
@@ -4412,7 +4412,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Count 1-bits for every number from 0 to n.",
       "Can you use previous answers? How does count for i relate to count for i/2?",
-      "i and i>>1 differ only in the last bit. dp[i] = dp[i>>1] + (i&1)."
+      "i and i>>1 differ only in the last bit. Count for i = count for i>>1 plus (i&1)."
     ],
     "solution": {
       "approach": "dp[0] = 0. For i from 1 to n: dp[i] = dp[i >> 1] + (i & 1).",
@@ -4437,8 +4437,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Only swap vowels, leave consonants in place.",
-      "Use two pointers from start and end.",
-      "Move pointers inward. When both point to vowels, swap them."
+      "Use two indices from start and end.",
+      "Move indices inward. When both point to vowels, swap them."
     ],
     "solution": {
       "approach": "Two pointers. Skip non-vowels. When both at vowels, swap and move both inward.",
@@ -4468,7 +4468,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "First step: how do you count how often each number appears?",
       "Now you have frequencies - how do you find the k highest?",
-      "A heap gives top k in O(n log k), but bucket sort can do O(n). What's the max possible frequency?"
+      "A priority structure gives top k in O(n log k), but bucket sort can do O(n). What's the max possible frequency?"
     ],
     "solution": {
       "approach": "Count frequencies with hash map, then bucket sort by frequency (index = frequency count).",
@@ -4497,7 +4497,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Each user has a timeline (list of tweets). News feed merges followed users' timelines.",
       "This is like 'Merge K Sorted Lists' - each user's tweets are sorted by time.",
-      "Use max-heap to get 10 most recent. Push latest tweet from each followed user, pop max, push next."
+      "Use a structure that gives you the most recent efficiently. Process latest from each followed user."
     ],
     "solution": {
       "approach": "HashMap for user->followers and user->tweets. getNewsFeed: heap merge of followed users' tweets.",
@@ -4547,9 +4547,9 @@ const PROBLEM_DATABASE = {
       "Binary Search": "Classic binary search. Call guess(mid) to determine which half to search."
     },
     "hints": [
-      "You're finding a number from 1 to n. Standard binary search.",
+      "You're finding a number from 1 to n. Eliminate half the possibilities with each guess.",
       "guess(num) returns -1 (too high), 1 (too low), or 0 (correct).",
-      "Binary search: if guess(mid) < 0, search lower half. If > 0, search upper half."
+      "If guess(mid) < 0, search lower half. If > 0, search upper half."
     ],
     "solution": {
       "approach": "Binary search [1, n]. Check guess(mid). Adjust search range accordingly.",
@@ -4598,8 +4598,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "3[a2[c]] = accaccacc. Handle nested brackets.",
-      "Stack handles nesting. On '[', save current state and start fresh. On ']', restore and combine.",
-      "Push (currentString, repeatCount) on '['. Pop on ']' and build result."
+      "A LIFO structure handles nesting. On '[', save current state and start fresh. On ']', restore and combine.",
+      "Save (currentString, repeatCount) on '['. Restore on ']' and build result."
     ],
     "solution": {
       "approach": "Stack of (string, count). On '[': push current, reset. On ']': pop, repeat current string, append to popped string.",
@@ -4629,7 +4629,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "a/b = 2 means path from a to b with value 2. c/d query = find path a to c, multiply edge weights.",
       "Build weighted directed graph. a/b = v creates a->b (weight v) and b->a (weight 1/v).",
-      "DFS from query source to target, multiplying edge weights along path."
+      "Explore from query source to target, multiplying edge weights along path."
     ],
     "solution": {
       "approach": "Build bidirectional weighted graph. For each query, DFS/BFS from source to target, multiply weights.",
@@ -4655,7 +4655,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "If we can find a subset with sum = totalSum/2, the other subset also sums to totalSum/2.",
       "This is the subset sum problem: can we select elements summing to target?",
-      "dp[j] = true if sum j is achievable. For each num, update dp[j] |= dp[j-num] (iterate j backwards)."
+      "Track which sums are achievable. For each num, each previously achievable sum j can now reach j+num (iterate backwards)."
     ],
     "solution": {
       "approach": "If sum is odd, return false. Target = sum/2. dp[j] = can reach sum j. For each num, update dp backwards.",
@@ -4684,7 +4684,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Instead of checking where water can flow from each cell, think in reverse.",
       "From which cells can water reach the Pacific? Atlantic?",
-      "DFS/BFS from ocean borders going 'uphill'. Find intersection of cells reachable from both."
+      "Explore from ocean borders going 'uphill'. Find intersection of cells reachable from both."
     ],
     "solution": {
       "approach": "DFS from Pacific border cells, mark reachable. DFS from Atlantic, mark reachable. Return intersection.",
@@ -4793,7 +4793,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Count consecutive characters. Write char and count (if > 1).",
-      "Use two pointers: one for reading, one for writing.",
+      "Use two indices: one for reading, one for writing.",
       "Be careful with multi-digit counts: '12' needs two characters."
     ],
     "solution": {
@@ -4900,7 +4900,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Unlike Coin Change I (min coins), count combinations (not permutations).",
       "To avoid counting [1,2] and [2,1] as different, process coins in outer loop.",
-      "dp[j] = ways to make j. For each coin (outer), for each amount (inner), dp[j] += dp[j-coin]."
+      "Ways to make j: for each coin (outer), for each amount (inner), ways[j] += ways[j-coin]."
     ],
     "solution": {
       "approach": "dp[j] = ways to make j. Outer loop on coins, inner on amounts. dp[j] += dp[j-coin].",
@@ -4926,7 +4926,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Diameter is longest path between any two nodes. It may or may not pass through root.",
       "At each node, longest path through it = left depth + right depth.",
-      "DFS to compute depth. At each node, update max diameter. Return depth for parent."
+      "Traverse to compute depth. At each node, update max diameter. Return depth for parent."
     ],
     "solution": {
       "approach": "DFS returns depth. At each node, update global max with leftDepth + rightDepth. Return max(left, right) + 1.",
@@ -4956,7 +4956,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Province = connected component. Count separate groups of connected cities.",
       "Adjacency matrix given. Traverse and count connected components.",
-      "For each unvisited city, start DFS/BFS to mark its component. Count starts."
+      "For each unvisited city, explore to mark its component. Count how many explorations you start."
     ],
     "solution": {
       "approach": "For each city 0 to n-1: if not visited, DFS to mark component, increment count.",
@@ -4984,7 +4984,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "A permutation has the same characters with same frequencies.",
-      "Use a sliding window of size len(s1). Check if window's char counts match s1's.",
+      "Use a fixed-size window of len(s1). Check if window's char counts match s1's.",
       "Optimize: track how many chars have matching counts. Window is valid when all 26 match."
     ],
     "solution": {
@@ -5063,7 +5063,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Same task must have at least n intervals between executions.",
-      "Greedy: always do the task with highest remaining count (minimizes idle time).",
+      "Always do the task with highest remaining count (minimizes idle time).",
       "Or think mathematically: how many idle slots does the most frequent task create?"
     ],
     "solution": {
@@ -5145,8 +5145,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Each senator can ban one opponent. Optimal: ban the next opponent to vote.",
-      "Use two queues: one for R indices, one for D indices.",
-      "Compare front of queues. Smaller index wins, bans other. Winner rejoins at position + n."
+      "Use two FIFO structures: one for R indices, one for D indices.",
+      "Compare fronts. Smaller index wins, bans other. Winner rejoins at position + n."
     ],
     "solution": {
       "approach": "Queues of indices for R and D. While both non-empty: smaller index wins, add winner to back with +n offset.",
@@ -5204,7 +5204,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "A tree has n-1 edges. One extra edge creates exactly one cycle.",
       "The redundant edge is the one that completes the cycle.",
-      "Use Union-Find. If both nodes already in same component, this edge is redundant."
+      "Track connected components. If both nodes already in the same group, this edge is redundant."
     ],
     "solution": {
       "approach": "Union-Find: for each edge, if find(u) == find(v), return this edge (cycle). Else union them.",
@@ -5232,7 +5232,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Similar to Number of Islands, but track size of each island.",
-      "DFS/BFS from each unvisited land cell. Count cells in that island.",
+      "Explore from each unvisited land cell. Count cells in that island.",
       "Track maximum area seen across all islands."
     ],
     "solution": {
@@ -5287,7 +5287,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Kth largest in a stream. Elements keep coming, need kth largest at any time.",
       "Keep only the k largest elements. The smallest of them is the kth largest.",
-      "Use a min-heap of size k. Top of heap is the answer. When adding, push then pop if size > k."
+      "Use a structure that efficiently gives the minimum element, kept to size k. When adding, insert then remove smallest if size > k."
     ],
     "solution": {
       "approach": "Min-heap of size k. Initialize with first elements. add(): push val, pop if size > k, return top.",
@@ -5387,7 +5387,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Positive = moving right, negative = moving left. Collision if right-moving meets left-moving.",
-      "Stack keeps asteroids not yet destroyed. Collision: current negative, stack top positive.",
+      "LIFO structure keeps asteroids not yet destroyed. Collision: current negative, last added positive.",
       "While collision possible: compare sizes. Smaller explodes. Equal = both explode."
     ],
     "solution": {
@@ -5413,8 +5413,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "For each day, you want the next day that's warmer. This is 'next greater element'.",
-      "Process right to left and maintain a stack of candidates? Or left to right resolving when you find greater?",
-      "Left to right: stack holds indices of days waiting for warmer day. Pop when you find it."
+      "Process right to left and maintain candidates? Or left to right resolving when you find greater?",
+      "Left to right: track indices of days waiting for warmer day. When you find a warmer day, resolve all waiting days that are cooler."
     ],
     "solution": {
       "approach": "Monotonic decreasing stack. Push indices. When temp[i] > temp[stack.top], pop and set result[popped] = i - popped.",
@@ -5442,8 +5442,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Find shortest path from k to every other node. Time to reach all = max of those times.",
-      "This is single-source shortest path. Use Dijkstra's algorithm.",
-      "Min-heap ordered by time. Process node, update neighbors' times. Track max time."
+      "This is single-source shortest path in a weighted graph.",
+      "Process nodes by shortest distance from source. Update neighbors' times. Track max time."
     ],
     "solution": {
       "approach": "Dijkstra from node k. Use min-heap (time, node). Return max time when all nodes visited, or -1 if not all reachable.",
@@ -5470,7 +5470,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "You can start from step 0 or 1. You can climb 1 or 2 steps.",
       "At each step, min cost = cost[i] + min(cost to reach from i-1, cost to reach from i-2).",
-      "dp[i] = cost[i] + min(dp[i-1], dp[i-2]). Answer is min(dp[n-1], dp[n-2])."
+      "Cost at step i = cost[i] + min(cost at i-1, cost at i-2). Answer is min of last two steps."
     ],
     "solution": {
       "approach": "dp[i] = cost[i] + min(dp[i-1], dp[i-2]). Return min(dp[n-1], dp[n-2]) - can reach top from either.",
@@ -5529,8 +5529,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "We want minimum T such that there's a path from (0,0) to (n-1,n-1) with all cells <= T.",
-      "Binary search on T. For each T, BFS/DFS to check if path exists.",
-      "Or: use modified Dijkstra where priority = max elevation on path to this cell."
+      "You can search on T. For each T, check if a path exists where all cells are <= T.",
+      "Or: process cells by shortest max-elevation path so far. Track the minimum maximum elevation to reach each cell."
     ],
     "solution": {
       "approach": "Dijkstra variant: min-heap by max elevation on path. Return answer when reaching (n-1,n-1).",
@@ -5558,8 +5558,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "At most k stops means at most k+1 edges.",
-      "Bellman-Ford finds shortest paths with limited edges.",
-      "dp[i][v] = min cost to v using at most i edges. Relax all edges k+1 times."
+      "You need shortest paths with limited number of edges, not unlimited.",
+      "Track min cost to each node using at most i edges. Relax all edges k+1 times."
     ],
     "solution": {
       "approach": "Bellman-Ford with k+1 iterations. dp[v] = min cost to reach v. Update by relaxing all edges.",
@@ -5584,7 +5584,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Think about states: fully filled rows vs rows with one corner missing.",
-      "dp[i] = ways to fill i full columns. But you need another state for partial columns.",
+      "Ways to fill i full columns. But you need another state for partial columns.",
       "Let f(n) = full tilings, p(n) = partial (L-shaped gap). Derive recurrence from piece placements."
     ],
     "solution": {
@@ -5613,7 +5613,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Start in room 0 (unlocked). Each room has keys to other rooms.",
       "This is graph reachability: can you visit all nodes from node 0?",
-      "DFS/BFS from 0. Track visited rooms. Return visited.size == n."
+      "Explore from 0. Track visited rooms. Return visited.size == n."
     ],
     "solution": {
       "approach": "DFS from room 0. Mark visited. For each key in room, visit that room if not visited. Check if all visited.",
@@ -5642,7 +5642,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Each group is consecutive numbers of size groupSize.",
       "Start with the smallest card. It must begin a group.",
-      "Sort or use min-heap. For each min card, try to form a group of consecutive values."
+      "Sort cards. For each smallest available card, try to form a group of consecutive values."
     ],
     "solution": {
       "approach": "Count cards in map. Process smallest first. For each, try to use it and next (groupSize-1) consecutive cards.",
@@ -5695,7 +5695,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Leaf = node with no children. Extract leaf sequence from left to right.",
-      "DFS traversal naturally visits leaves in left-to-right order.",
+      "Traversing the tree naturally visits leaves in left-to-right order.",
       "Collect leaves from both trees, compare sequences."
     ],
     "solution": {
@@ -5722,7 +5722,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "If Koko eats at speed k, hours for pile p = ceil(p/k). Can she finish all piles in h hours?",
       "You're searching for minimum k where total hours <= h. What's the range for k?",
-      "k ranges from 1 to max(piles). Binary search: if current k works, try smaller. If not, try larger."
+      "k ranges from 1 to max(piles). Search by halving: if current k works, try smaller. If not, try larger."
     ],
     "solution": {
       "approach": "Binary search on k in [1, max(piles)]. For each k, sum ceil(pile/k) for all piles. If <= h, try smaller k.",
@@ -5748,7 +5748,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Span = consecutive days (including today) where price was <= today's price.",
       "Think about what happens when today's price is higher than yesterday's.",
-      "Use a stack of (price, span). Pop all smaller prices, accumulate their spans."
+      "Use a LIFO structure of (price, span). Pop all smaller prices, accumulate their spans."
     ],
     "solution": {
       "approach": "Stack of (price, span). On next: pop all smaller, add their spans. Push (price, total span). Return span.",
@@ -5776,7 +5776,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Count calls in last 3000 milliseconds including current.",
       "New calls have increasing timestamps. What can you remove?",
-      "Queue: add new timestamp, remove from front while front < t - 3000."
+      "FIFO structure: add new timestamp, remove from front while front < t - 3000."
     ],
     "solution": {
       "approach": "Queue of timestamps. On ping(t): add t, remove while front < t - 3000. Return queue size.",
@@ -5805,7 +5805,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Compute distance for each point. Find k smallest distances.",
       "Don't need sqrt for distance - compare squared distances.",
-      "Use max-heap of size k. Or quickselect for O(n) average."
+      "Use a structure that gives the max of k elements, so you can remove the farthest. Or partition around kth element."
     ],
     "solution": {
       "approach": "Max-heap of size k. For each point, push. If size > k, pop (removes farthest). Return heap contents.",
@@ -5834,7 +5834,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "For each key, store all (timestamp, value) pairs.",
       "Timestamps are strictly increasing per key, so the list is sorted.",
-      "Binary search for largest timestamp <= query timestamp."
+      "Search for largest timestamp <= query timestamp in the sorted list."
     ],
     "solution": {
       "approach": "HashMap: key -> list of (timestamp, value). Get: binary search for floor timestamp in list.",
@@ -5859,8 +5859,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "All rotten oranges spread simultaneously. This is multi-source, not single-source.",
-      "BFS from all rotten oranges at once. Each 'wave' of BFS is one minute.",
-      "Count fresh oranges initially. Decrement as they rot. Time = BFS levels. Check if all rotted."
+      "Explore from all rotten oranges at once. Each 'wave' of exploration is one minute.",
+      "Count fresh oranges initially. Decrement as they rot. Time = number of waves. Check if all rotted."
     ],
     "solution": {
       "approach": "Add all rotten oranges to queue. BFS: for each level (minute), rot adjacent fresh oranges. Track time and fresh count.",
@@ -5910,8 +5910,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Always smash two heaviest stones. Result is their difference (or both destroyed if equal).",
-      "Need to repeatedly get two maximum values. What data structure?",
-      "Max-heap: pop two, push difference if nonzero. Stop when 0 or 1 stones left."
+      "Need to repeatedly get two maximum values. What data structure helps?",
+      "Use a structure that gives the max element efficiently. Pop two, push difference if nonzero. Stop when 0 or 1 stones left."
     ],
     "solution": {
       "approach": "Max-heap of stones. While size > 1: pop two, push |diff| if nonzero. Return last stone or 0.",
@@ -5989,7 +5989,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Subsequence doesn't need to be contiguous. What's the longest common one?",
       "Compare last characters. If they match, they're part of LCS. If not, try excluding one or the other.",
-      "Match: dp[i][j] = 1 + dp[i-1][j-1]. No match: dp[i][j] = max(dp[i-1][j], dp[i][j-1])."
+      "Match: result = 1 + result for (i-1, j-1). No match: result = max of excluding either character."
     ],
     "solution": {
       "approach": "2D DP: if text1[i] == text2[j], dp[i][j] = dp[i-1][j-1] + 1, else max(dp[i-1][j], dp[i][j-1]).",
@@ -6016,7 +6016,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Find the level (1-indexed) with the largest sum.",
-      "BFS processes level by level. Sum each level, track max.",
+      "Process the tree level by level. Sum each level, track max.",
       "Return smallest level number if there are ties."
     ],
     "solution": {
@@ -6070,8 +6070,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "For each prefix of searchWord, find products that start with that prefix.",
-      "Trie naturally gives you words with a given prefix.",
-      "Or: sort products, binary search for prefix, take first 3 matches."
+      "A prefix tree structure naturally gives you words with a given prefix.",
+      "Or: sort products, search for prefix starting position, take first 3 matches."
     ],
     "solution": {
       "approach": "Sort products. For each prefix, binary search to find first match. Collect up to 3 that share prefix.",
@@ -6201,7 +6201,7 @@ const PROBLEM_DATABASE = {
       "Sliding Window": "Fixed window of size k. Count vowels in window. Slide and update count."
     },
     "hints": [
-      "Fixed-size sliding window of size k.",
+      "Fixed-size window of size k.",
       "Count vowels in initial window. As window slides, update count.",
       "Add new char (if vowel), remove old char (if vowel). Track max count."
     ],
@@ -6231,7 +6231,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Roads are directed. All cities should reach city 0. Minimum changes needed?",
       "From city 0's perspective: edges pointing toward 0 are good, away from 0 need reversal.",
-      "DFS from 0. Track edge direction. Count edges going 'wrong way' (away from 0)."
+      "Explore from 0. Track edge direction. Count edges going 'wrong way' (away from 0)."
     ],
     "solution": {
       "approach": "Build adjacency with direction marker. DFS from 0. Count edges pointing away (need to flip).",
@@ -6285,7 +6285,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "This is Minimum Spanning Tree with Manhattan distance as edge weight.",
       "All pairs of points are potential edges. Sort by distance.",
-      "Kruskal's: sort edges, union-find to add edges not creating cycle. Stop at n-1 edges."
+      "Sort edges, add edges that connect different components (not creating a cycle). Stop at n-1 edges."
     ],
     "solution": {
       "approach": "Generate all O(n^2) edges with Manhattan distance. Sort by weight. Kruskal's with union-find.",
@@ -6337,8 +6337,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Find pairs that sum to k. Each element can be used once.",
-      "Sorting + two pointers works like Two Sum II.",
-      "Or use hash map: for each num, check if k-num is available, then remove both."
+      "Sorting + scanning from both ends works like Two Sum II.",
+      "Or use a map: for each num, check if k-num is available, then remove both."
     ],
     "solution": {
       "approach": "Sort. Two pointers: if sum == k, count++, move both. If < k, move left. If > k, move right.",
@@ -6388,7 +6388,7 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Take one char from word1, one from word2, repeat.",
-      "Use two pointers i and j. Alternate: take word1[i++], then word2[j++].",
+      "Use two indices i and j. Alternate: take word1[i++], then word2[j++].",
       "When one string is exhausted, append the rest of the other."
     ],
     "solution": {
@@ -6417,8 +6417,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "For each query, find smallest interval containing it.",
-      "Process queries in sorted order. Maintain heap of active intervals.",
-      "Add intervals starting before query. Remove intervals ending before query. Heap gives smallest."
+      "Process queries in sorted order. Maintain active intervals sorted by size.",
+      "Add intervals starting before query. Remove intervals ending before query. Smallest active is the answer."
     ],
     "solution": {
       "approach": "Sort queries and intervals. For each query, add intervals with start <= query to min-heap (by size). Remove invalid. Answer = top.",
@@ -6468,8 +6468,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Find shortest path to any exit. Exit = empty cell on border (not entrance).",
-      "BFS gives shortest path in unweighted graph/grid.",
-      "BFS from entrance. When you reach a border cell (not entrance), that's the answer."
+      "Level-by-level exploration gives shortest path in unweighted graph/grid.",
+      "Explore from entrance. When you reach a border cell (not entrance), that's the answer."
     ],
     "solution": {
       "approach": "BFS from entrance. For each cell, check if it's an exit (on border, not entrance). Return distance when found.",
@@ -6605,7 +6605,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "For each spell, count potions where spell * potion >= success.",
       "Potion threshold: success / spell (rounded up). Count potions >= threshold.",
-      "Sort potions. Binary search for first potion >= threshold. All after it are successful."
+      "Sort potions. Search for first potion >= threshold. All after it are successful."
     ],
     "solution": {
       "approach": "Sort potions. For each spell, binary search for min potion s.t. spell*potion >= success. Count = n - index.",
@@ -6634,7 +6634,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Initially, smallest is 1. popSmallest returns smallest and removes it.",
       "addBack puts a number back (if it was removed).",
-      "Use heap for efficiency. Track what's been removed to handle addBack."
+      "Use a structure that efficiently gives the minimum. Track what's been removed to handle addBack."
     ],
     "solution": {
       "approach": "Min-heap starts with 1. addBack: push to heap if was removed (track in set). popSmallest: pop from heap.",
@@ -6684,7 +6684,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Star removes the closest non-star character to its left.",
       "'Closest to left' = most recently added. What data structure gives that?",
-      "Stack: push letters, pop on star. Final stack is the result."
+      "LIFO: add letters, remove last on star. Final result is what remains."
     ],
     "solution": {
       "approach": "Stack of chars. For each char: if star, pop. Else push. Join remaining stack.",
@@ -6709,8 +6709,8 @@ const PROBLEM_DATABASE = {
     },
     "hints": [
       "Hire k workers. Each time, pick from first 'candidates' or last 'candidates' workers.",
-      "Use two min-heaps: one for front candidates, one for back candidates.",
-      "Pick smallest from either heap. Refill that heap from remaining workers."
+      "Use two structures that give the minimum: one for front candidates, one for back candidates.",
+      "Pick smallest from either. Refill from remaining workers."
     ],
     "solution": {
       "approach": "Two min-heaps for front and back 'candidates' workers. Pick min k times, refilling heaps from middle.",
@@ -6739,7 +6739,7 @@ const PROBLEM_DATABASE = {
     "hints": [
       "Score = min(nums[picked]) * sum(multipliers[picked]). Balance these two.",
       "If you fix which elements are picked, score = min(nums) * sum(multipliers).",
-      "Sort by nums descending. Consider prefixes. For each min, compute best sum using heap for largest multipliers."
+      "Sort by nums descending. Consider prefixes. For each min, compute best sum by tracking k largest multipliers seen so far."
     ],
     "solution": {
       "approach": "Pair (nums[i], multipliers[i]). Sort by nums descending. Use min-heap of size k for largest multipliers. Track max score.",

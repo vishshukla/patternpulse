@@ -1,21 +1,432 @@
-{
-  "summary": {
-    "totalRequired": 256,
-    "missingProblems": 0,
-    "missingHints": 0,
-    "emptyHints": 0,
-    "missingPatternExplanations": 0,
-    "missingSolution": 0,
-    "duplicateHints": 0,
-    "duplicateExplanations": 0
+[
+  {
+    "id": "11",
+    "title": "Container With Most Water",
+    "pattern": "Two Pointers",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Area = min(height[left], height[right]) × (right - left). Start with max width.",
+      "When you move a pointer, width decreases. When is it worth it?",
+      "Moving the taller line can never help - the shorter line still limits height. Move the shorter one."
+    ]
   },
-  "issues": {
-    "missingProblems": [],
-    "missingHints": [],
-    "emptyHints": [],
-    "missingPatternExplanations": [],
-    "missingSolution": [],
-    "duplicateHints": [],
-    "duplicateExplanations": []
+  {
+    "id": "12",
+    "title": "Integer to Roman",
+    "pattern": "Greedy",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Roman numerals use subtractive notation: IV=4, IX=9, XL=40, XC=90, CD=400, CM=900.",
+      "What if you had a list of all values (including subtractive ones) in descending order?",
+      "Greedily pick the largest value that fits, subtract it, and append the symbol. Repeat until num = 0."
+    ]
+  },
+  {
+    "id": "13",
+    "title": "Roman to Integer",
+    "pattern": "Hash Map",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "I=1, V=5, X=10, L=50, C=100, D=500, M=1000. How do IV and IX work?",
+      "In IV, I comes before V. When does a smaller value come before a larger one?",
+      "If s[i] < s[i+1], subtract s[i]; otherwise add s[i]. This handles all subtractive cases."
+    ]
+  },
+  {
+    "id": "28",
+    "title": "Find the Index of the First Occurrence in a String",
+    "pattern": "Two Pointers",
+    "issues": [
+      "Hint 1 contains \"stack\": \"At how many positions in haystack could needle potentially s...\"",
+      "Hint 3 contains \"stack\": \"Iterate i from 0 to len(haystack)-len(needle). At each i, co...\""
+    ],
+    "hints": [
+      "At how many positions in haystack could needle potentially start? What's the last valid starting position?",
+      "For each potential start position, you need to verify if the substring matches needle. How do you check this efficiently?",
+      "Iterate i from 0 to len(haystack)-len(needle). At each i, compare characters needle[j] with haystack[i+j] for all j."
+    ]
+  },
+  {
+    "id": "35",
+    "title": "Search Insert Position",
+    "pattern": "Binary Search",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Where would you insert a number in a sorted array to keep it sorted? It's the position of the first element >= target.",
+      "Searching naturally converges to the insertion point when the target isn't found. What does the left index point to when the loop ends?",
+      "Halve the search space repeatedly. When the loop ends without finding target, the left index is at the insertion position (first element >= target)."
+    ]
+  },
+  {
+    "id": "46",
+    "title": "Permutations",
+    "pattern": "Backtracking",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Permutation = arrangement using all elements exactly once.",
+      "At each position, try every unused number. Mark as used, recurse, unmark.",
+      "Or use swapping: swap element at current position with each element from current to end."
+    ]
+  },
+  {
+    "id": "67",
+    "title": "Add Binary",
+    "pattern": "Math",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Binary addition is like decimal but base 2. 1+1=10 in binary (sum=0, carry=1). How do you handle carry?",
+      "Start from rightmost digits. Add them plus carry. Result digit = sum % 2, new carry = sum / 2.",
+      "Use two indices from end of each string. While either string has digits or carry exists, compute sum % 2 and sum / 2. Build result in reverse."
+    ]
+  },
+  {
+    "id": "69",
+    "title": "Sqrt(x)",
+    "pattern": "Binary Search",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "You need the largest integer k where k^2 <= x. How can you find this boundary by eliminating half the search space each time?",
+      "Search on the answer: if mid^2 <= x, mid could be the answer (search right for larger). If mid^2 > x, search left.",
+      "Search range [0, x]. While left <= right: if mid*mid <= x, record mid and search right (left = mid+1). Else search left (right = mid-1)."
+    ]
+  },
+  {
+    "id": "102",
+    "title": "Binary Tree Level Order Traversal",
+    "pattern": "BFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Level order = all nodes at depth 1, then depth 2, etc. Process layer by layer.",
+      "Use a structure that lets you process nodes in the order they were added, while adding their children.",
+      "Track level size before processing to know when one level ends and next begins."
+    ]
+  },
+  {
+    "id": "104",
+    "title": "Maximum Depth of Binary Tree",
+    "pattern": "DFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Depth = number of nodes on longest path from root to leaf.",
+      "For any node, its depth contribution is 1 + the deeper of its two subtrees.",
+      "For each node: return 1 + max(maxDepth(left), maxDepth(right)). Base: null returns 0."
+    ]
+  },
+  {
+    "id": "146",
+    "title": "LRU Cache",
+    "pattern": "Linked List",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "LRU = Least Recently Used. Need to track usage order and evict oldest when full.",
+      "Need O(1) lookup by key AND O(1) update of 'most recently used'. What combination works?",
+      "Use a map for key lookup and a doubly-linked structure for ordering. Move accessed items to front."
+    ]
+  },
+  {
+    "id": "162",
+    "title": "Find Peak Element",
+    "pattern": "Binary Search",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "A peak is greater than its neighbors. nums[-1] = nums[n] = -∞.",
+      "Think about which direction leads uphill. The peak must be in that direction.",
+      "If nums[mid] < nums[mid+1], we're on ascending slope, go right. Else go left."
+    ]
+  },
+  {
+    "id": "199",
+    "title": "Binary Tree Right Side View",
+    "pattern": "BFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Right side view = rightmost node at each level.",
+      "Process level by level - what's the last node at each level?",
+      "Or explore right-to-left, going deep before wide: first node you see at each new depth is the answer for that level."
+    ]
+  },
+  {
+    "id": "215",
+    "title": "Kth Largest Element in an Array",
+    "pattern": "Heap/Priority Queue",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Kth largest = (n-k+1)th smallest. How can you find this efficiently?",
+      "A structure that always gives you the smallest element, kept to size k, holds the k largest. What's at the top?",
+      "Add elements. If size > k, remove smallest. Finally, the smallest of the k largest is your answer."
+    ]
+  },
+  {
+    "id": "253",
+    "title": "Meeting Rooms II",
+    "pattern": "Heap",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Minimum rooms = maximum number of concurrent meetings.",
+      "Sort by start time. Track end times of ongoing meetings.",
+      "Track end times so you can always get the earliest. For each meeting: if earliest end <= new start, reuse that room. Always add new end."
+    ]
+  },
+  {
+    "id": "322",
+    "title": "Coin Change",
+    "pattern": "Dynamic Programming",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "To make amount a, you can use any coin c where c <= a. Then you need to make amount a-c.",
+      "Min coins for a = minimum of (min coins for a-c plus 1) for all coins c.",
+      "Build up from amount 0. Base case: 0 coins needed for amount 0. For each amount, try each coin."
+    ]
+  },
+  {
+    "id": "394",
+    "title": "Decode String",
+    "pattern": "Stack",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "3[a2[c]] = accaccacc. Handle nested brackets.",
+      "A LIFO structure handles nesting. On '[', save current state and start fresh. On ']', restore and combine.",
+      "Save (currentString, repeatCount) on '['. Restore on ']' and build result."
+    ]
+  },
+  {
+    "id": "399",
+    "title": "Evaluate Division",
+    "pattern": "DFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "a/b = 2 means path from a to b with value 2. c/d query = find path a to c, multiply edge weights.",
+      "Build weighted directed graph. a/b = v creates a->b (weight v) and b->a (weight 1/v).",
+      "Explore from query source to target, multiplying edge weights along path."
+    ]
+  },
+  {
+    "id": "416",
+    "title": "Partition Equal Subset Sum",
+    "pattern": "Dynamic Programming",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "If we can find a subset with sum = totalSum/2, the other subset also sums to totalSum/2.",
+      "This is the subset sum problem: can we select elements summing to target?",
+      "Track which sums are achievable. For each num, each previously achievable sum j can now reach j+num (iterate backwards)."
+    ]
+  },
+  {
+    "id": "435",
+    "title": "Non-overlapping Intervals",
+    "pattern": "Greedy",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Minimum removals = total - maximum non-overlapping intervals you can keep.",
+      "Which intervals should you prefer to keep? Ones that end early leave more room.",
+      "Sort by end time. Keep interval if it starts after previous kept interval ends."
+    ]
+  },
+  {
+    "id": "547",
+    "title": "Number of Provinces",
+    "pattern": "DFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Province = connected component. Count separate groups of connected cities.",
+      "Adjacency matrix given. Traverse and count connected components.",
+      "For each unvisited city, explore to mark its component. Count how many explorations you start."
+    ]
+  },
+  {
+    "id": "735",
+    "title": "Asteroid Collision",
+    "pattern": "Stack",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Positive = moving right, negative = moving left. Collision if right-moving meets left-moving.",
+      "LIFO structure keeps asteroids not yet destroyed. Collision: current negative, last added positive.",
+      "While collision possible: compare sizes. Smaller explodes. Equal = both explode."
+    ]
+  },
+  {
+    "id": "743",
+    "title": "Network Delay Time",
+    "pattern": "BFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Find shortest path from k to every other node. Time to reach all = max of those times.",
+      "This is single-source shortest path in a weighted graph.",
+      "Process nodes by shortest distance from source. Update neighbors' times. Track max time."
+    ]
+  },
+  {
+    "id": "778",
+    "title": "Swim in Rising Water",
+    "pattern": "Binary Search",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "We want minimum T such that there's a path from (0,0) to (n-1,n-1) with all cells <= T.",
+      "You can search on T. For each T, check if a path exists where all cells are <= T.",
+      "Or: process cells by shortest max-elevation path so far. Track the minimum maximum elevation to reach each cell."
+    ]
+  },
+  {
+    "id": "872",
+    "title": "Leaf-Similar Trees",
+    "pattern": "DFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Leaf = node with no children. Extract leaf sequence from left to right.",
+      "Traversing the tree naturally visits leaves in left-to-right order.",
+      "Collect leaves from both trees, compare sequences."
+    ]
+  },
+  {
+    "id": "875",
+    "title": "Koko Eating Bananas",
+    "pattern": "Binary Search",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "If Koko eats at speed k, hours for pile p = ceil(p/k). Can she finish all piles in h hours?",
+      "You're searching for minimum k where total hours <= h. What's the range for k?",
+      "k ranges from 1 to max(piles). Search by halving: if current k works, try smaller. If not, try larger."
+    ]
+  },
+  {
+    "id": "901",
+    "title": "Online Stock Span",
+    "pattern": "Stack",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Span = consecutive days (including today) where price was <= today's price.",
+      "Think about what happens when today's price is higher than yesterday's.",
+      "Use a LIFO structure of (price, span). Pop all smaller prices, accumulate their spans."
+    ]
+  },
+  {
+    "id": "1137",
+    "title": "N-th Tribonacci Number",
+    "pattern": "Dynamic Programming",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "T(0) = 0, T(1) = 1, T(2) = 1. For n >= 3, T(n) = T(n-1) + T(n-2) + T(n-3).",
+      "Keep track of last three values.",
+      "Similar to Fibonacci, just with one more term in the recurrence."
+    ]
+  },
+  {
+    "id": "1431",
+    "title": "Kids With the Greatest Number of Candies",
+    "pattern": "Greedy",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "A kid can have the greatest if candies[i] + extraCandies >= max(candies).",
+      "Find the maximum candies any kid has.",
+      "For each kid, check if adding extra gets them to at least the max."
+    ]
+  },
+  {
+    "id": "1899",
+    "title": "Merge Triplets to Form Target Triplet",
+    "pattern": "Greedy",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "merge([a,b,c], [d,e,f]) = [max(a,d), max(b,e), max(c,f)].",
+      "We can only use triplets where each element <= corresponding target element.",
+      "For each position, check if some valid triplet has that position's target value."
+    ]
+  },
+  {
+    "id": "1926",
+    "title": "Nearest Exit from Entrance in Maze",
+    "pattern": "BFS",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Find shortest path to any exit. Exit = empty cell on border (not entrance).",
+      "Level-by-level exploration gives shortest path in unweighted graph/grid.",
+      "Explore from entrance. When you reach a border cell (not entrance), that's the answer."
+    ]
+  },
+  {
+    "id": "2300",
+    "title": "Successful Pairs of Spells and Potions",
+    "pattern": "Binary Search",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "For each spell, count potions where spell * potion >= success.",
+      "Potion threshold: success / spell (rounded up). Count potions >= threshold.",
+      "Sort potions. Search for first potion >= threshold. All after it are successful."
+    ]
+  },
+  {
+    "id": "2542",
+    "title": "Maximum Subsequence Score",
+    "pattern": "Greedy",
+    "issues": [
+      "Hint 1 may be too specific (contains \"=\")"
+    ],
+    "hints": [
+      "Score = min(nums[picked]) * sum(multipliers[picked]). Balance these two.",
+      "If you fix which elements are picked, score = min(nums) * sum(multipliers).",
+      "Sort by nums descending. Consider prefixes. For each min, compute best sum by tracking k largest multipliers seen so far."
+    ]
   }
-}
+]
