@@ -1,0 +1,74 @@
+# .github/workflows/promote-staging.yml
+name: Promote Staging to Main
+
+on:
+  schedule:
+    - cron: '0 23 * * 1-5'  # 6pm EST weekdays (11pm UTC)
+  workflow_dispatch:  # Manual trigger button
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - name: Check if staging has new commits
+        id: check
+        run: |
+          git fetch origin main
+          DIFF=$(git rev-list --count origin/main..staging)
+          echo "Staging is $DIFF commits ahead of main"
+          echo "commits_ahead=$DIFF" >> $GITHUB_OUTPUT
+
+      - name: Check for existing PR
+        id: existing_pr
+        if: steps.check.outputs.commits_ahead > 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXISTING=$(gh pr list --base main --head staging --json number -q '.[0].number' || echo "")
+          echo "existing_pr=$EXISTING" >> $GITHUB_OUTPUT
+
+      - name: Create PR to main
+        if: steps.check.outputs.commits_ahead > 0 && steps.existing_pr.outputs.existing_pr == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get commit messages for PR body
+          COMMITS=$(git log origin/main..staging --pretty=format:"- %s" | head -20)
+
+          gh pr create \
+            --base main \
+            --head staging \
+            --title "Release: Promote staging to main" \
+            --body "## Automated promotion of staging changes
+
+          ### Commits included:
+          $COMMITS
+
+          ---
+          *This PR was created automatically by the promote-staging workflow.*"
+
+      - name: Enable auto-merge
+        if: steps.check.outputs.commits_ahead > 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_NUM=$(gh pr list --base main --head staging --json number -q '.[0].number')
+          if [ -n "$PR_NUM" ]; then
+            gh pr merge $PR_NUM --merge --auto || echo "Auto-merge already enabled or PR not ready"
+          fi
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.check.outputs.commits_ahead }}" = "0" ]; then
+            echo "✅ Staging is up to date with main. Nothing to promote."
+          else
+            echo "✅ Created/updated PR to promote staging to main."
+          fi

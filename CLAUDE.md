@@ -143,59 +143,83 @@ const PROBLEM_DATABASE = {
 
 ## Git Workflow
 
+### Branch Structure
+
+```
+main        - Production (protected, auto-releases)
+staging     - Integration branch (daily work accumulates here)
+feature/*   - New features → PR to staging
+fix/*       - Bug fixes → PR to staging
+hotfix/*    - Urgent fixes → PR directly to main
+```
+
 ### Branch Rules
 
-- **NEVER push directly to `main`** - always use feature branches
+- **NEVER push directly to `main`** - only staging/hotfix can merge
+- **NEVER push directly to `staging`** - use feature/fix branches
 - **NEVER add AI attribution** - no "Generated with Claude" or "Co-Authored-By"
-- Branch prefixes:
-  - `release/X.Y.Z` - version releases
-  - `fix/description` - bug fixes
-  - `hotfix/description` - urgent production fixes
-  - `feature/description` - new features (merge to release branch first)
 
 ### For LLMs
 
 ```bash
-# 1. Always start on latest main
-git checkout main && git pull
+# 1. Always start on latest staging
+git checkout staging && git pull
 
-# 2. Create branch BEFORE making changes
-git checkout -b fix/description-of-change
+# 2. Create feature branch BEFORE making changes
+git checkout -b feature/description-of-change
+# or: git checkout -b fix/description-of-change
 
-# 3. Make changes, commit (no AI attribution!)
-git add . && git commit -m "Fix the thing"
+# 3. Make changes, commit with conventional commit format
+git add . && git commit -m "feat: add new feature"
+# or: git commit -m "fix: resolve scroll issue"
 
 # 4. Push to feature branch
-git push -u origin fix/description-of-change
+git push -u origin feature/description-of-change
 
-# 5. Create PR (if gh cli available)
-gh pr create --title "Fix the thing" --body "Description"
+# 5. Create PR to STAGING (not main!)
+gh pr create --base staging --title "feat: add new feature" --body "Description"
 ```
+
+### Conventional Commits (Auto-Versioning)
+
+Version bumps are automatic based on commit message prefixes:
+
+| Prefix | Version Bump | Example |
+|--------|--------------|---------|
+| `fix:` | Patch (0.0.X) | `fix: resolve scroll issue` |
+| `feat:` | Minor (0.X.0) | `feat: add dark mode` |
+| `feat!:` | Major (X.0.0) | `feat!: redesign entire UI` |
+| `chore:` | No bump | `chore: update docs` |
+| `docs:` | No bump | `docs: fix typo in README` |
 
 ### CI/CD Pipeline
 
 ```
-PR opened to main
-      ↓
-┌─────────────────────────────┐
-│ ci.yml runs:                │
-│  • check-branch-name        │
-│  • run-tests (npm test)     │
-└─────────────────────────────┘
-      ↓
-PR merged to main
-      ↓
-┌─────────────────────────────┐
-│ publish-extension.yml:      │
-│  • Detect version bump      │
-│  • Create GitHub Release    │
-│  • Run tests                │
-│  • Build zip                │
-│  • Upload to Chrome Store   │
-└─────────────────────────────┘
+feature/* ──PR──→ staging ──────────────→ main ──→ Chrome Store
+                     │                      │
+                     │                      ↓
+              (CI runs tests)    (Auto-version + Release)
+                     │                      │
+                     ↓                      ↓
+              Vercel Preview          Vercel Production
 ```
 
-**To release:** Bump version in `manifest.json`, commit message becomes release notes.
+**Daily flow:**
+1. Create `feature/*` or `fix/*` branch from staging
+2. Make changes, commit with conventional commit format
+3. PR to staging → CI runs tests
+4. Merge to staging
+5. At 6pm EST (or manual trigger): staging → main
+6. Auto-version bump based on commits
+7. Release created, extension published
+
+### Workflows
+
+| File | Trigger | Purpose |
+|------|---------|---------|
+| `ci.yml` | PR to main/staging | Validate branch name, run tests |
+| `publish-extension.yml` | Push to main | Auto-version, release, publish |
+| `promote-staging.yml` | Daily 6pm EST / manual | PR staging → main |
 
 ---
 
