@@ -293,13 +293,9 @@ async function openRandomProblem() {
     const randomIndex = Math.floor(Math.random() * problemPool.length);
     const randomProblem = problemPool[randomIndex];
 
-    // Open in current tab
+    // Open in new tab (no special permissions required)
     const url = `https://leetcode.com/problems/${randomProblem.slug}/`;
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.update(tabs[0].id, { url });
-      }
-    });
+    chrome.tabs.create({ url });
 
   } catch (error) {
     console.error('[Popup] Error opening random problem:', error);
