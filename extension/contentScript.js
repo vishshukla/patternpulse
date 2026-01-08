@@ -409,6 +409,14 @@ function showQuiz() {
 
   const sidebar = createQuizSidebar();
   document.body.appendChild(sidebar);
+
+  // Remove attention animation class after it completes (prevents re-triggering on hover)
+  if (!isPracticeMode) {
+    setTimeout(() => {
+      const tab = sidebar.querySelector('.pattern-pulse-tab');
+      if (tab) tab.classList.remove('attention');
+    }, 2000); // Animation is 1.8s, give a bit of buffer
+  }
 }
 
 /**
@@ -429,8 +437,11 @@ function createQuizSidebar() {
 
   const explainerClass = isPracticeMode ? 'quiz-explainer practice-mode' : 'quiz-explainer';
 
+  // Add attention animation only for new problems (not practice mode)
+  const tabClass = isPracticeMode ? 'pattern-pulse-tab' : 'pattern-pulse-tab attention';
+
   sidebar.innerHTML = `
-    <div class="pattern-pulse-tab" title="PatternPulse">
+    <div class="${tabClass}" title="PatternPulse">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="6" cy="6" r="2.5" fill="${iconColor1}"/>
         <circle cx="18" cy="6" r="2.5" fill="${iconColor2}"/>
@@ -486,6 +497,7 @@ function createQuizSidebar() {
           <button class="${isPracticeMode ? 'reset-button' : 'skip-button'}" id="footer-button">
             ${isPracticeMode ? 'Reset Problem' : 'Skip for now'}
           </button>
+          <a class="disagree-link" id="disagree-link" style="display: none;">Disagree with answer?</a>
         </div>
       </div>
     </div>
@@ -579,26 +591,62 @@ async function handleCorrectAnswer(selectedPattern) {
   // Remove shields
   removeShields();
 
-  // Pin sidebar so it stays open
-  sidebar.classList.add('pinned');
+  // Add confirmed class - allows hover-away behavior immediately
+  sidebar.classList.add('confirmed');
+
+  // Determine if this is the primary pattern or an acceptable alternative
+  const primaryPattern = normalizePattern(currentProblem.primaryPattern);
+  const isPrimaryPattern = selectedPattern === primaryPattern;
+
+  // Get explanations from database
+  const explanations = currentProblem.patternExplanations || {};
+  const selectedExplanation = explanations[selectedPattern] || '';
+  const primaryExplanation = explanations[primaryPattern] || '';
+
+  // Build success content based on whether primary or acceptable pattern was chosen
+  let successContent;
+  if (isPrimaryPattern) {
+    // Primary pattern - simple success message with explanation
+    successContent = `
+      <div class="quiz-success">
+        <div class="success-icon">✓</div>
+        <h2>Correct!</h2>
+        <div class="success-explanation">
+          <strong>${selectedPattern}</strong>
+          ${selectedExplanation}
+        </div>
+        <button class="continue-button" id="continue-button">
+          Continue
+        </button>
+      </div>
+    `;
+  } else {
+    // Acceptable pattern - encouraging message with both explanations
+    successContent = `
+      <div class="quiz-success">
+        <div class="success-icon">✓</div>
+        <h2>Nice!</h2>
+        <div class="success-explanation">
+          <strong>${selectedPattern} works here</strong>
+          ${selectedExplanation}
+        </div>
+        <div class="success-alternative">
+          <strong>${primaryPattern} is often preferred</strong>
+          ${primaryExplanation}
+        </div>
+        <button class="continue-button" id="continue-button">
+          Continue
+        </button>
+      </div>
+    `;
+  }
 
   // Show confirmation screen
-  quiz.innerHTML = `
-    <div class="quiz-success">
-      <div class="success-icon">✓</div>
-      <h2>Correct!</h2>
-      <p class="success-message">
-        <strong>${selectedPattern}</strong> is the right pattern!
-      </p>
-      <button class="continue-button" id="continue-button">
-        Continue
-      </button>
-    </div>
-  `;
+  quiz.innerHTML = successContent;
 
   // Transition to green practice mode view
   const transitionToGreen = () => {
-    sidebar.classList.remove('pinned');
+    sidebar.classList.remove('confirmed');
     sidebar.classList.add('completed');
 
     // Hide panel smoothly
@@ -618,7 +666,6 @@ async function handleCorrectAnswer(selectedPattern) {
   };
 
   document.getElementById('continue-button').addEventListener('click', transitionToGreen);
-  sidebar.addEventListener('mouseleave', transitionToGreen, { once: true });
 }
 
 /**
@@ -641,6 +688,42 @@ function handleWrongAnswer(selectedPattern, buttonElement) {
     buttonElement.classList.add('wrong-shake');
     setTimeout(() => buttonElement.classList.remove('wrong-shake'), 500);
   }
+
+  // Show disagree link after first wrong attempt
+  const disagreeLink = document.getElementById('disagree-link');
+  if (disagreeLink && disagreeLink.style.display === 'none') {
+    disagreeLink.style.display = 'block';
+    disagreeLink.onclick = () => openDisagreeIssue(selectedPattern);
+  } else if (disagreeLink) {
+    // Update the pattern for subsequent wrong clicks
+    disagreeLink.onclick = () => openDisagreeIssue(selectedPattern);
+  }
+}
+
+/**
+ * Open GitHub issue for pattern disagreement (simple direct link)
+ */
+function openDisagreeIssue(selectedPattern) {
+  const problemId = currentProblem?.leetcodeId || 'Unknown';
+  const problemTitle = currentProblem?.title || 'Unknown';
+  const problemSlug = currentProblem?.slug || '';
+  const expectedPattern = currentProblem?.primaryPattern || 'Unknown';
+
+  const issueTitle = encodeURIComponent(`Pattern disagreement: #${problemId} - ${selectedPattern}`);
+  const issueBody = encodeURIComponent(
+`**Problem**: #${problemId} - ${problemTitle}
+**LeetCode**: https://leetcode.com/problems/${problemSlug}/
+
+**Current answer**: ${expectedPattern}
+**I think it should be**: ${selectedPattern}
+
+**Why**:
+<!-- Please explain your reasoning -->
+
+`);
+
+  const githubUrl = `https://github.com/vishshukla/patternpulse/issues/new?title=${issueTitle}&body=${issueBody}&labels=pattern-feedback`;
+  window.open(githubUrl, '_blank');
 }
 
 /**

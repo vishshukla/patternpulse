@@ -14,12 +14,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Arrays & Hashing",
     "primaryPattern": "Hash Map",
-    "acceptablePatterns": [
-      "Two Pointers"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Hash Map": "Store each number's index as you iterate. For each number, check if (target - num) exists in the map. This gives O(1) lookup for complements.",
-      "Two Pointers": "If you sort first, use left/right pointers moving inward. However, you'd need to track original indices, making Hash Map cleaner for this problem."
+      "Hash Map": "Store each number's index as you iterate. For each number, check if (target - num) exists in the map. This gives O(1) lookup for complements."
     },
     "hints": [
       "For each number, what other number would you need to reach the target?",
@@ -343,13 +340,11 @@ const PROBLEM_DATABASE = {
     "difficulty": "easy",
     "primaryPattern": "Two Pointers",
     "acceptablePatterns": [
-      "Trie",
-      "Binary Search"
+      "Trie"
     ],
     "patternExplanations": {
       "Two Pointers": "Use vertical scanning: compare characters at the same position across all strings. Stop when characters differ or a string ends. Build prefix character by character.",
-      "Trie": "Insert all strings into a Trie. Traverse from root while each node has exactly one child and isn't a word end. Overkill for single query but efficient for repeated prefix queries.",
-      "Binary Search": "Binary search on prefix length. For a given length, check if all strings share that prefix. Use min string length as upper bound."
+      "Trie": "Insert all strings into a Trie. Traverse from root while each node has exactly one child and isn't a word end. Both O(S) - Trie is overkill for single query but efficient for repeated prefix queries."
     },
     "hints": [
       "What happens if you compare the first character of every string? When can you safely add it to the result?",
@@ -475,12 +470,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Linked List",
     "primaryPattern": "Two Pointers",
-    "acceptablePatterns": [
-      "Linked List"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Two Pointers": "Advance first pointer n steps ahead. Then move both until first hits end. Second is at the node before target.",
-      "Linked List": "The fast/slow pointer technique lets you find position from end without knowing list length."
+      "Two Pointers": "Use the fast/slow pointer gap technique: advance fast n steps, then move both until fast hits null. Slow ends at the node before target, allowing removal."
     },
     "hints": [
       "Nth from end means: when one marker reaches the end, another marker should be at the target.",
@@ -1125,13 +1117,11 @@ const PROBLEM_DATABASE = {
     "category": "Greedy",
     "primaryPattern": "Greedy",
     "acceptablePatterns": [
-      "Dynamic Programming",
       "BFS"
     ],
     "patternExplanations": {
       "Greedy": "Track current range boundary and farthest reachable. When you hit boundary, increment jumps and extend boundary.",
-      "BFS": "BFS where level = number of jumps. From each index, you can reach indices up to i + nums[i].",
-      "Dynamic Programming": "dp[i] = min jumps to reach i. O(n^2). Greedy is O(n)."
+      "BFS": "BFS where level = number of jumps. From each index, you can reach indices up to i + nums[i]."
     },
     "hints": [
       "Find minimum jumps to reach the end.",
@@ -1250,17 +1240,14 @@ const PROBLEM_DATABASE = {
     "slug": "powx-n",
     "difficulty": "medium",
     "primaryPattern": "Binary Search",
-    "acceptablePatterns": [
-      "Math"
-    ],
+    "acceptablePatterns": [],
     "explanation": "Depth-first search - explore as deep as possible before backtracking. Use recursion or stack for implementation.",
     "lists": [
       "neetcode-150"
     ],
     "category": "Math",
     "patternExplanations": {
-      "Binary Search": "Use binary exponentiation: x^n = (x^(n/2))^2. Halve the exponent each step.",
-      "Math": "Fast power algorithm: if n is even, x^n = (x^2)^(n/2). If odd, x^n = x * x^(n-1)."
+      "Binary Search": "Binary exponentiation: x^n = (x^(n/2))². Halve the exponent each step. Handle negative n by using 1/x. O(log n) multiplications."
     },
     "hints": [
       "Computing x^n by multiplying x n times is O(n). Can you do better?",
@@ -1331,13 +1318,11 @@ const PROBLEM_DATABASE = {
     "category": "Greedy",
     "primaryPattern": "Greedy",
     "acceptablePatterns": [
-      "Dynamic Programming",
-      "Divide and Conquer"
+      "Dynamic Programming"
     ],
     "patternExplanations": {
       "Greedy": "Kadane's algorithm: track current sum. If it goes negative, reset to 0 (start new subarray). Track max seen.",
-      "Dynamic Programming": "dp[i] = max subarray ending at i = max(nums[i], dp[i-1] + nums[i]). Same as Kadane's.",
-      "Divide and Conquer": "Max subarray is in left half, right half, or crosses middle. O(n log n)."
+      "Dynamic Programming": "dp[i] = max subarray ending at i = max(nums[i], dp[i-1] + nums[i]). Same as Kadane's."
     },
     "hints": [
       "At each position, should you extend the previous subarray or start fresh?",
@@ -1386,12 +1371,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Greedy",
     "primaryPattern": "Greedy",
-    "acceptablePatterns": [
-      "Dynamic Programming"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Greedy": "Track farthest reachable index. If current index > farthest, can't reach it. If farthest >= last index, success.",
-      "Dynamic Programming": "dp[i] = can reach index i? Check if any j < i can reach i. O(n^2), greedy is better."
+      "Greedy": "Track farthest reachable index as you iterate. At each position, update farthest = max(farthest, i + nums[i]). If i > farthest, unreachable. If farthest >= last index, success."
     },
     "hints": [
       "Can you reach the last index starting from index 0?",
@@ -1511,12 +1493,9 @@ const PROBLEM_DATABASE = {
     "slug": "permutation-sequence",
     "difficulty": "hard",
     "primaryPattern": "Math",
-    "acceptablePatterns": [
-      "Backtracking"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Math": "Use factorial number system. k-1 tells us which block of (n-1)! permutations we're in. Divide by factorials to determine each digit position.",
-      "Backtracking": "Generate all permutations in order until reaching the k-th. Inefficient but straightforward."
+      "Math": "Use factorial number system. k-1 tells us which block of (n-1)! permutations we're in. Divide by factorials to determine each digit position."
     },
     "hints": [
       "There are n! permutations total. For each first digit choice, there are (n-1)! permutations. Which digit is first in the k-th permutation?",
@@ -1725,12 +1704,9 @@ const PROBLEM_DATABASE = {
     "slug": "sqrtx",
     "difficulty": "easy",
     "primaryPattern": "Binary Search",
-    "acceptablePatterns": [
-      "Math"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Binary Search": "Search for largest integer k where k*k <= x. Binary search in range [0, x]. If mid*mid <= x, answer is at least mid, search right. Else search left.",
-      "Math": "Newton's method: start with guess, iterate guess = (guess + x/guess) / 2 until converged."
+      "Binary Search": "Search for largest integer k where k*k <= x. Binary search in range [0, x]. If mid*mid <= x, answer could be mid or larger (search right). Else search left."
     },
     "hints": [
       "You need the largest integer k where k^2 <= x. How can you find this boundary by eliminating half the search space each time?",
@@ -2376,12 +2352,9 @@ const PROBLEM_DATABASE = {
     "slug": "unique-binary-search-trees",
     "difficulty": "medium",
     "primaryPattern": "Dynamic Programming",
-    "acceptablePatterns": [
-      "Math"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Dynamic Programming": "dp[n] = number of unique BSTs with n nodes. For root at position i: dp[i-1] left trees * dp[n-i] right trees. Sum over all i.",
-      "Math": "This is the nth Catalan number: C(n) = (2n)! / ((n+1)! * n!) or C(n) = C(n-1) * 2(2n-1) / (n+1)."
+      "Dynamic Programming": "dp[n] = number of unique BSTs with n nodes. For root at position i: left subtree has dp[i-1] arrangements, right has dp[n-i]. Sum products over all root positions. This is the Catalan number sequence."
     },
     "hints": [
       "If root is at position i (1-indexed), left subtree has i-1 nodes, right subtree has n-i nodes. How do you combine these?",
@@ -2564,12 +2537,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Trees",
     "primaryPattern": "DFS",
-    "acceptablePatterns": [
-      "Hash Map"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "DFS": "Preorder first element = root. Find root in inorder to split left/right subtrees. Recurse.",
-      "Hash Map": "Map inorder values to indices for O(1) lookup of root position. Avoids O(n) search each time."
+      "DFS": "Preorder first element = root. Find root in inorder to split left/right subtrees. Recurse on left/right portions. Use hash map for O(1) index lookup in inorder array."
     },
     "hints": [
       "Preorder: root first, then left subtree, then right subtree. Inorder: left, root, right.",
@@ -2815,13 +2785,11 @@ const PROBLEM_DATABASE = {
     "category": "Graphs",
     "primaryPattern": "DFS",
     "acceptablePatterns": [
-      "BFS",
-      "Hash Map"
+      "BFS"
     ],
     "patternExplanations": {
-      "DFS": "Recursively clone nodes. Use map from original to clone to handle cycles and avoid duplicates.",
-      "BFS": "Iteratively clone using queue. Same map to track cloned nodes.",
-      "Hash Map": "Essential to both approaches - maps original node to its clone."
+      "DFS": "Recursively clone nodes. Use a map from original to clone to handle cycles and avoid duplicates. Each node cloned exactly once.",
+      "BFS": "Iteratively clone using queue and the same original-to-clone map. Process nodes level by level."
     },
     "hints": [
       "Need to create new nodes and connect them the same way. How to handle cycles?",
@@ -3196,12 +3164,10 @@ const PROBLEM_DATABASE = {
     "category": "Two Pointers",
     "primaryPattern": "Two Pointers",
     "acceptablePatterns": [
-      "Binary Search",
       "Hash Map"
     ],
     "patternExplanations": {
       "Two Pointers": "Start with left=0, right=n-1. If sum too small, move left up. If sum too big, move right down. Sorted order makes this work.",
-      "Binary Search": "For each number, binary search for its complement. O(n log n) but two pointers is simpler.",
       "Hash Map": "Works but doesn't leverage sorted property. Two pointers is optimal here."
     },
     "hints": [
@@ -3590,12 +3556,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Heap / Priority Queue",
     "primaryPattern": "Heap/Priority Queue",
-    "acceptablePatterns": [
-      "Quickselect"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Heap/Priority Queue": "Use min-heap of size k. Add all elements. Heap top is kth largest. O(n log k).",
-      "Quickselect": "Partition-based selection like quicksort. Average O(n), but worst case O(n^2)."
+      "Heap/Priority Queue": "Use min-heap of size k. Process all elements - if heap size > k, pop the smallest. Heap top is kth largest. O(n log k) time, O(k) space."
     },
     "hints": [
       "Kth largest = (n-k+1)th smallest. How can you find this efficiently?",
@@ -3644,12 +3607,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Arrays & Hashing",
     "primaryPattern": "Hash Map",
-    "acceptablePatterns": [
-      "Sorting"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Hash Map": "Add each number to a set. If you try to add a number that's already there, you found a duplicate. O(n) time, O(n) space.",
-      "Sorting": "Sort the array first, then adjacent duplicates will be next to each other. O(n log n) time, O(1) space if sorting in-place."
+      "Hash Map": "Add each number to a set. If you try to add a number that's already there, you found a duplicate. O(n) time, O(n) space."
     },
     "hints": [
       "What's the simplest way to know if you've seen a number before?",
@@ -3803,17 +3763,14 @@ const PROBLEM_DATABASE = {
     "slug": "sliding-window-maximum",
     "difficulty": "hard",
     "primaryPattern": "Sliding Window",
-    "acceptablePatterns": [
-      "Heap"
-    ],
+    "acceptablePatterns": [],
     "explanation": "Maintain a window of elements that slides through the array. Expand when adding elements, contract when removing. Track window state.",
     "lists": [
       "neetcode-150"
     ],
     "category": "Sliding Window",
     "patternExplanations": {
-      "Sliding Window": "Monotonic decreasing deque. Remove smaller elements when adding. Remove out-of-window elements.",
-      "Heap": "Max-heap of (value, index). Pop elements outside window before getting max."
+      "Sliding Window": "Monotonic decreasing deque. Remove smaller elements when adding. Remove out-of-window elements."
     },
     "hints": [
       "For each window, you need the maximum. Naive is O(nk). Can you do O(n)?",
@@ -3836,12 +3793,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Arrays & Hashing",
     "primaryPattern": "Hash Map",
-    "acceptablePatterns": [
-      "Sorting"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Hash Map": "Count character frequencies in both strings. If the frequency maps are identical, they're anagrams. O(n) time.",
-      "Sorting": "Sort both strings and compare. Anagrams will produce identical sorted strings. O(n log n) time."
+      "Hash Map": "Count character frequencies in both strings. If the frequency maps are identical, they're anagrams. O(n) time."
     },
     "hints": [
       "What makes two words anagrams of each other?",
@@ -4071,17 +4025,14 @@ const PROBLEM_DATABASE = {
     "slug": "find-the-duplicate-number",
     "difficulty": "medium",
     "primaryPattern": "Two Pointers",
-    "acceptablePatterns": [
-      "Binary Search"
-    ],
+    "acceptablePatterns": [],
     "explanation": "Two pointers technique - use multiple indices to traverse the data structure efficiently, often from opposite ends or at different speeds.",
     "lists": [
       "neetcode-150"
     ],
     "category": "Linked List",
     "patternExplanations": {
-      "Two Pointers": "Floyd's cycle detection. Array indices as next pointers. The cycle start is the duplicate.",
-      "Binary Search": "Binary search on value range [1,n]. Count elements <= mid. If count > mid, duplicate is <= mid."
+      "Two Pointers": "Floyd's cycle detection. Array indices as next pointers. The cycle start is the duplicate."
     },
     "hints": [
       "There are n+1 numbers in range [1,n]. By pigeonhole, there's a duplicate.",
@@ -4158,12 +4109,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "1-D Dynamic Programming",
     "primaryPattern": "Dynamic Programming",
-    "acceptablePatterns": [
-      "Binary Search"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Dynamic Programming": "dp[i] = LIS ending at index i. For each j < i where nums[j] < nums[i]: dp[i] = max(dp[i], dp[j] + 1). O(n^2).",
-      "Binary Search": "Maintain array of smallest tail for each LIS length. Binary search to find position to update. O(n log n)."
+      "Dynamic Programming": "dp[i] = LIS ending at index i. For each j < i where nums[j] < nums[i]: dp[i] = max(dp[i], dp[j] + 1). Build answer by checking all previous elements that could extend."
     },
     "hints": [
       "For each position i, what's the longest increasing subsequence that ends at i?",
@@ -4272,7 +4220,8 @@ const PROBLEM_DATABASE = {
     ],
     "patternExplanations": {
       "Union Find": "Initially n components. Each edge potentially merges two. Final count = components.",
-      "DFS": "DFS from each unvisited node. Count how many DFS traversals needed."
+      "DFS": "DFS from each unvisited node. Count how many DFS traversals needed to visit all nodes.",
+      "BFS": "BFS from each unvisited node. Count how many BFS traversals needed - each traversal explores one component."
     },
     "hints": [
       "Count distinct connected components.",
@@ -4457,12 +4406,10 @@ const PROBLEM_DATABASE = {
     "category": "Arrays & Hashing",
     "primaryPattern": "Hash Map",
     "acceptablePatterns": [
-      "Heap/Priority Queue",
       "Bucket Sort"
     ],
     "patternExplanations": {
       "Hash Map": "Count frequencies, then use bucket sort where index = frequency. Scan buckets from highest to lowest. O(n) time.",
-      "Heap/Priority Queue": "Count frequencies, then use a min-heap of size k to track top k elements. O(n log k) time.",
       "Bucket Sort": "Create buckets where bucket[i] contains elements with frequency i. Max frequency is n, so O(n) buckets."
     },
     "hints": [
@@ -4756,14 +4703,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Binary Tree - DFS",
     "primaryPattern": "DFS",
-    "acceptablePatterns": [
-      "Hash Map",
-      "Prefix Sum"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "DFS": "Use prefix sum with hash map. Track cumulative sum. If currSum - targetSum exists in map, those are valid paths.",
-      "Hash Map": "Map stores prefix sums seen on current path. currSum - target in map = path ending at current node.",
-      "Prefix Sum": "Path sum from A to B = prefixSum(B) - prefixSum(A). Find where prefixSum(A) = currSum - target."
+      "DFS": "DFS with prefix sum technique: track cumulative sum from root. Store prefix sums in hash map. At each node, count paths where currSum - target exists in map. Backtrack: remove current sum when leaving node."
     },
     "hints": [
       "Path can start/end anywhere (but must go downward). Count all paths summing to target.",
@@ -5160,17 +5102,14 @@ const PROBLEM_DATABASE = {
     "slug": "valid-parenthesis-string",
     "difficulty": "medium",
     "primaryPattern": "Greedy",
-    "acceptablePatterns": [
-      "Dynamic Programming"
-    ],
+    "acceptablePatterns": [],
     "explanation": "Break problem into overlapping subproblems. Build solution bottom-up or top-down with memoization.",
     "lists": [
       "neetcode-150"
     ],
     "category": "Greedy",
     "patternExplanations": {
-      "Greedy": "Track min and max possible open parens. '*' can be '(', ')', or empty. Check if 0 is achievable.",
-      "Dynamic Programming": "Track all possible counts of open parens at each position."
+      "Greedy": "Track range [minOpen, maxOpen] of possible open paren counts. '(' increases both, ')' decreases both, '*' widens range. Valid if 0 is in final range."
     },
     "hints": [
       "'*' can be '(', ')', or empty. Many possibilities.",
@@ -5428,17 +5367,14 @@ const PROBLEM_DATABASE = {
     "slug": "network-delay-time",
     "difficulty": "medium",
     "primaryPattern": "BFS",
-    "acceptablePatterns": [
-      "DFS"
-    ],
+    "acceptablePatterns": [],
     "explanation": "Depth-first search - explore as deep as possible before backtracking. Use recursion or stack for implementation.",
     "lists": [
       "neetcode-150"
     ],
     "category": "Graphs",
     "patternExplanations": {
-      "BFS": "Dijkstra's algorithm: find shortest paths from source to all nodes. Return max of shortest paths.",
-      "DFS": "BFS/Dijkstra from source k. Track time to reach each node. Answer is max time."
+      "BFS": "Dijkstra's algorithm with min-heap: process nodes by shortest known distance. Track shortest time to each node. Answer is max of all reachable nodes' times."
     },
     "hints": [
       "Find shortest path from k to every other node. Time to reach all = max of those times.",
@@ -5790,17 +5726,14 @@ const PROBLEM_DATABASE = {
     "slug": "k-closest-points-to-origin",
     "difficulty": "medium",
     "primaryPattern": "Heap",
-    "acceptablePatterns": [
-      "Quickselect"
-    ],
+    "acceptablePatterns": [],
     "explanation": "Maintain ordered access to min/max elements. Useful for k-largest/smallest, merging, or scheduling problems.",
     "lists": [
       "neetcode-150"
     ],
     "category": "Heap / Priority Queue",
     "patternExplanations": {
-      "Heap": "Max-heap of size k by distance. Keep k closest by removing farther points.",
-      "Quickselect": "Quickselect to partition around kth closest. O(n) average."
+      "Heap": "Max-heap of size k by distance. Add all points, keeping only k closest. Pop the farthest when size exceeds k. Final heap contains k closest points."
     },
     "hints": [
       "Compute distance for each point. Find k smallest distances.",
@@ -5819,17 +5752,14 @@ const PROBLEM_DATABASE = {
     "slug": "time-based-key-value-store",
     "difficulty": "medium",
     "primaryPattern": "Hash Map",
-    "acceptablePatterns": [
-      "Binary Search"
-    ],
+    "acceptablePatterns": [],
     "explanation": "Use hash map for O(1) lookups and frequency counting. Perfect for tracking seen elements or mapping relationships.",
     "lists": [
       "neetcode-150"
     ],
     "category": "Binary Search",
     "patternExplanations": {
-      "Hash Map": "Map key to list of (timestamp, value). Binary search list for largest timestamp <= given.",
-      "Binary Search": "Store (timestamp, value) pairs per key. Binary search for floor timestamp."
+      "Hash Map": "Map each key to a sorted list of (timestamp, value) pairs. On get, binary search for the largest timestamp <= query time. Timestamps arrive in increasing order, so inserts are O(1)."
     },
     "hints": [
       "For each key, store all (timestamp, value) pairs.",
@@ -6326,25 +6256,22 @@ const PROBLEM_DATABASE = {
     "lists": [
       "leetcode-75"
     ],
-    "category": "Two Pointers",
-    "primaryPattern": "Two Pointers",
-    "acceptablePatterns": [
-      "Hash Map"
-    ],
+    "category": "Hash Map",
+    "primaryPattern": "Hash Map",
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Two Pointers": "Sort array. Two pointers from ends. If sum = k, pair found. If sum < k, move left up. If sum > k, move right down.",
-      "Hash Map": "For each number, check if complement (k - num) exists in map. If yes, pair. Track counts for duplicates."
+      "Hash Map": "For each number, check if complement (k - num) exists in map. If yes, pair and remove. Track counts for duplicates. O(n) time."
     },
     "hints": [
       "Find pairs that sum to k. Each element can be used once.",
-      "Sorting + scanning from both ends works like Two Sum II.",
-      "Or use a map: for each num, check if k-num is available, then remove both."
+      "For each number, you need to find if its complement exists. What data structure helps?",
+      "Use a map: for each num, check if k-num is available, then remove both from the map."
     ],
     "solution": {
-      "approach": "Sort. Two pointers: if sum == k, count++, move both. If < k, move left. If > k, move right.",
-      "timeComplexity": "O(n log n)",
-      "spaceComplexity": "O(1) if sorting in place",
-      "keyInsight": "Sorted two-pointer for pair sum is efficient and straightforward."
+      "approach": "Use hash map to count occurrences. For each num, check if k-num exists. Pair and decrement counts.",
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(n)",
+      "keyInsight": "Hash map for complement lookup avoids O(n log n) sorting overhead."
     }
   },
   "1732": {
@@ -6513,12 +6440,9 @@ const PROBLEM_DATABASE = {
     ],
     "category": "Linked List",
     "primaryPattern": "Two Pointers",
-    "acceptablePatterns": [
-      "Linked List"
-    ],
+    "acceptablePatterns": [],
     "patternExplanations": {
-      "Two Pointers": "Slow and fast pointers. When fast reaches end, slow is at middle. Need previous pointer to delete.",
-      "Linked List": "Fast-slow technique finds middle in one pass without counting."
+      "Two Pointers": "Fast-slow pointer technique: fast moves 2 steps while slow moves 1. When fast reaches end, slow is at middle. Track previous node to perform deletion."
     },
     "hints": [
       "Middle node: for odd length it's center, for even it's floor(n/2)th.",
@@ -6542,13 +6466,11 @@ const PROBLEM_DATABASE = {
     "category": "Linked List",
     "primaryPattern": "Two Pointers",
     "acceptablePatterns": [
-      "Linked List",
       "Stack"
     ],
     "patternExplanations": {
-      "Two Pointers": "Find middle, reverse second half, then iterate both halves comparing sums.",
-      "Linked List": "Classic technique: find middle, reverse, process.",
-      "Stack": "Push first half values. Pop while iterating second half, calculate sums."
+      "Two Pointers": "Find middle using fast/slow, reverse second half in-place, then walk both halves simultaneously comparing twin sums. O(1) space.",
+      "Stack": "Push first half values onto stack. Pop while iterating second half, pairing values for twin sums. O(n) space but simpler logic."
     },
     "hints": [
       "Twin: node i and node n-1-i. Sum of twins at opposite ends.",

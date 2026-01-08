@@ -44,7 +44,7 @@
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 5px;
+  width: 8px;
   height: 60px;
   background: rgba(99, 102, 241, 0.6);
   border: none;
@@ -83,6 +83,42 @@
   opacity: 1;
 }
 
+/* Attention animation - plays once on first load */
+@keyframes tabAttention {
+  0% {
+    width: 8px;
+    background: rgba(99, 102, 241, 0.6);
+  }
+  25% {
+    width: 42px;
+    background: rgba(99, 102, 241, 0.95);
+    box-shadow: -4px 0 20px rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    width: 42px;
+    background: rgba(99, 102, 241, 0.95);
+  }
+  100% {
+    width: 8px;
+    background: rgba(99, 102, 241, 0.6);
+  }
+}
+
+.pattern-pulse-tab.attention {
+  animation: tabAttention 1.8s ease-out;
+}
+
+.pattern-pulse-tab.attention svg {
+  animation: tabAttentionIcon 1.8s ease-out;
+}
+
+@keyframes tabAttentionIcon {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .pattern-pulse-tab svg circle,
 .pattern-pulse-tab svg path {
   transition: fill 0.3s ease, stroke 0.3s ease;
@@ -99,21 +135,13 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  overflow-y: auto;
+  overflow: hidden;  /* Only quiz inside should scroll, not the panel */
   color: #e4e4e7;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-50%) translateX(10px);
   transition: all 0.2s ease-out;
   pointer-events: none;
-  /* Hide scrollbar */
-  -ms-overflow-style: none;  /* IE/Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.pattern-pulse-panel::-webkit-scrollbar {
-  display: none;  /* Chrome/Safari */
 }
 
 /* Show panel on sidebar hover */
@@ -238,7 +266,7 @@
 .pattern-pulse-quiz {
   padding: 14px;
   height: 100%;
-  max-height: calc(100vh - 48px);
+  max-height: calc(80vh - 4px);  /* Match panel's 80vh minus border */
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
@@ -623,6 +651,22 @@
   color: #a1a1aa;
 }
 
+/* Disagree link shown after wrong answer */
+.disagree-link {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #71717a;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.15s ease;
+}
+
+.disagree-link:hover {
+  color: #a1a1aa;
+}
+
 /* Feedback Form */
 .feedback-form {
   background: rgba(255, 255, 255, 0.04);
@@ -789,6 +833,45 @@
   color: #22c55e;
 }
 
+.success-explanation {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #a1a1aa;
+}
+
+.success-explanation strong {
+  color: #22c55e;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+/* Alternative pattern suggestion (for acceptable patterns) */
+.success-alternative {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #a1a1aa;
+}
+
+.success-alternative strong {
+  color: #fbbf24;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
 .solution-insight {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -944,6 +1027,18 @@
 /* ========================================
    COMPLETED STATE - Green tab
    ======================================== */
+
+/* Confirmed state - success shown, hoverable, not yet in practice mode */
+.pattern-pulse-sidebar.confirmed .pattern-pulse-tab {
+  background: rgba(34, 197, 94, 0.7);
+  /* Subtle pulse to indicate success */
+  animation: confirmedPulse 2s ease-in-out infinite;
+}
+
+@keyframes confirmedPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(34, 197, 94, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(34, 197, 94, 0.5); }
+}
 
 .pattern-pulse-sidebar.completed .pattern-pulse-tab {
   background: rgba(34, 197, 94, 0.7);

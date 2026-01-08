@@ -101,7 +101,8 @@ describe('Problem Database', () => {
       expect(problem.slug).toBe('two-sum');
       expect(problem.difficulty).toBe('easy');
       expect(problem.primaryPattern).toBe('Hash Map');
-      expect(problem.acceptablePatterns).toContain('Two Pointers');
+      // Note: Two Pointers was removed as it requires O(n log n) sorting vs Hash Map's O(n)
+      expect(problem.acceptablePatterns).not.toContain('Two Pointers');
     });
 
     it('should have Contains Duplicate (ID 217) with correct data', () => {

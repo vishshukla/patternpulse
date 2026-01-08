@@ -72,10 +72,24 @@ The primary pattern should be:
 3. **The pattern that best teaches the underlying concept**
 
 ### Acceptable Patterns
-Include a pattern as "acceptable" if:
-1. It solves the problem correctly with reasonable complexity
-2. It's a valid alternative approach interviewers would accept
-3. It teaches a different useful concept
+**CRITICAL: Acceptable patterns must have the SAME optimal time complexity as the primary pattern.**
+
+Include a pattern as "acceptable" ONLY if:
+1. **Same optimal time complexity** as the primary pattern (e.g., both O(n), both O(n log n))
+2. It solves the problem correctly
+3. It represents a genuinely different algorithmic approach
+
+**DO NOT include as acceptable:**
+- Patterns that require an extra log factor (e.g., O(n log n) when primary is O(n))
+- Brute force or suboptimal approaches
+- Patterns that only work with modifications to the problem
+
+**Examples:**
+| Problem | Primary | Acceptable? | Why |
+|---------|---------|-------------|-----|
+| Two Sum | Hash Map O(n) | Two Pointers O(n log n) | ❌ NO - requires sorting, different complexity |
+| 3Sum | Two Pointers O(n²) | Hash Map O(n²) | ✅ YES - same complexity, different approach |
+| Sliding Window Max | Monotonic Deque O(n) | Heap O(n log k) | ❌ NO - different complexity |
 
 ### Pattern Red Flags to Check
 - Is "Two Pointers" being used when it's really just iteration?
