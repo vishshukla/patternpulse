@@ -122,22 +122,24 @@ jobs:
         run: |
           COMMITS=$(git log origin/main..staging --pretty=format:"- %s" | head -20)
 
-          BODY="## Automated promotion of staging changes
+          # Write body to temp file to avoid YAML parsing issues with colons
+          cat > /tmp/pr_body.md << PREOF
+          ## Automated promotion of staging changes
 
-### Version
-v${VERSION} (${BUMP_TYPE} bump)
+          **Version:** v${VERSION} (${BUMP_TYPE} bump)
 
-### Commits included:
-${COMMITS}
+          **Commits included**
+          ${COMMITS}
 
----
-*This PR was created automatically by the promote-staging workflow.*"
+          ---
+          *This PR was created automatically by the promote-staging workflow.*
+          PREOF
 
           gh pr create \
             --base main \
             --head staging \
             --title "Release v${VERSION}: Promote staging to main" \
-            --body "$BODY"
+            --body-file /tmp/pr_body.md
 
       - name: Enable auto-merge
         if: steps.check.outputs.commits_ahead > 0
