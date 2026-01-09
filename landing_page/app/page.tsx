@@ -16,7 +16,7 @@ export default function Home() {
     },
     {
       q: 'What problems are covered?',
-      a: 'LeetCode\'s first 100 problems, NeetCode 150, and LeetCode 75. We\'re continuously adding more based on feedback.'
+      a: 'Currently 256 problems including NeetCode 150, LeetCode 75, and the first 100 LeetCode problems. We\'re actively adding more every week — the goal is full LeetCode coverage.'
     },
     {
       q: 'How do the AI hints work?',
@@ -91,8 +91,8 @@ export default function Home() {
                 <span>Works instantly</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-emerald-400">256</span>
-                <span>curated problems</span>
+                <span className="text-emerald-400">256+</span>
+                <span>problems & growing</span>
               </div>
             </div>
           </motion.div>
@@ -237,9 +237,9 @@ export default function Home() {
                 <div className="w-8 h-8 bg-electric-purple/10 rounded-lg flex items-center justify-center text-electric-purple">
                   <Target className="w-4 h-4" />
                 </div>
-                <h3 className="text-base font-semibold text-white">Popular Problem Lists</h3>
+                <h3 className="text-base font-semibold text-white">256+ Problems & Growing</h3>
               </div>
-              <p className="text-sm text-gray-500">NeetCode 150, LeetCode 75, and the first 100 LeetCode problems. Continuously adding more.</p>
+              <p className="text-sm text-gray-500">NeetCode 150, LeetCode 75, and more. New problems added weekly — working toward full LeetCode coverage.</p>
             </motion.div>
 
             <motion.div
