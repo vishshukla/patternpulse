@@ -237,8 +237,7 @@ feature/* ──PR──→ staging ──────────────�
 1. Create `hotfix/*` branch from main
 2. Make fix AND bump version in `extension/manifest.json` manually
 3. PR to main → CI validates version was bumped
-4. Merge → auto-publishes like normal release
-5. After hotfix: sync staging with `git checkout staging && git merge main && git push`
+4. Merge → auto-publishes like normal release + auto-syncs staging
 
 **Manual promotion (don't want to wait for 6pm):**
 1. Go to: Actions → "Promote Staging to Main"
@@ -250,7 +249,7 @@ feature/* ──PR──→ staging ──────────────�
 | File | Trigger | Purpose |
 |------|---------|---------|
 | `ci.yml` | PR to main/staging | Validate branch, lint commits, run tests, check hotfix version |
-| `publish-extension.yml` | Push to main | Tag, release, publish (reads version from manifest) |
+| `publish-extension.yml` | Push to main | Tag, release, publish, sync staging with main |
 | `promote-staging.yml` | Daily 6pm EST / manual | Bump version on staging, PR to main |
 
 **CI checks (`ci.yml`):**

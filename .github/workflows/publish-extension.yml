@@ -111,3 +111,23 @@ jobs:
           client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
           refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
           publish: true
+
+  sync-staging:
+    needs: [tag-and-release, build-and-publish]
+    if: always() && needs.tag-and-release.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ secrets.STAGING_PAT }}
+
+      - name: Sync staging with main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git merge origin/main -m "chore: sync staging with main after release"
+          git push origin staging
+          echo "✅ Staging synced with main"
