@@ -7,140 +7,82 @@ on:
   workflow_dispatch:  # Manual trigger
 
 jobs:
-  version-and-release:
+  tag-and-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     outputs:
-      version: ${{ steps.bump.outputs.new_version }}
-      should_release: ${{ steps.bump.outputs.should_release }}
+      version: ${{ steps.version.outputs.version }}
+      should_release: ${{ steps.check.outputs.should_release }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for commit parsing
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Full history for tag checking
 
-      - name: Determine version bump from commits
-        id: bump
+      - name: Get version from manifest
+        id: version
         run: |
-          # Get last release tag
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "Last tag: $LAST_TAG"
+          VERSION=$(jq -r '.version' extension/manifest.json)
+          echo "Version from manifest: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          # Get commits since last tag
-          COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
-          echo "Commits since $LAST_TAG:"
-          echo "$COMMITS"
+      - name: Check if release needed
+        id: check
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="v$VERSION"
 
-          # Skip if no new commits or only chore/docs commits
-          if [ -z "$COMMITS" ]; then
-            echo "No new commits. Skipping release."
+          # Check if this tag already exists
+          if git tag -l "$TAG" | grep -q "$TAG"; then
+            echo "Tag $TAG already exists. Skipping release."
             echo "should_release=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Check if all commits are chore/docs (no version bump needed)
-          NON_CHORE=$(echo "$COMMITS" | grep -vE "^(chore|docs|ci|style|refactor)(\(.+\))?:" || true)
-          if [ -z "$NON_CHORE" ]; then
-            echo "Only chore/docs commits. Skipping release."
-            echo "should_release=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Determine bump type from conventional commits
-          BUMP="patch"  # Default
-
-          if echo "$COMMITS" | grep -qE "^feat(\(.+\))?!:|BREAKING CHANGE:"; then
-            BUMP="major"
-            echo "Found breaking change - major bump"
-          elif echo "$COMMITS" | grep -qE "^feat(\(.+\))?:"; then
-            BUMP="minor"
-            echo "Found feat commit - minor bump"
           else
-            echo "Default to patch bump"
+            echo "Tag $TAG does not exist. Will create release."
+            echo "should_release=true" >> $GITHUB_OUTPUT
           fi
 
-          # Get current version from manifest
-          CURRENT=$(jq -r '.version' extension/manifest.json)
-          echo "Current version: $CURRENT"
-
-          # Parse version components
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-
-          # Calculate new version
-          case $BUMP in
-            major)
-              NEW_VERSION="$((MAJOR + 1)).0.0"
-              ;;
-            minor)
-              NEW_VERSION="$MAJOR.$((MINOR + 1)).0"
-              ;;
-            patch)
-              NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
-              ;;
-          esac
-
-          echo "New version: $NEW_VERSION (bump type: $BUMP)"
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "bump_type=$BUMP" >> $GITHUB_OUTPUT
-          echo "should_release=true" >> $GITHUB_OUTPUT
-
-      - name: Update manifest.json
-        if: steps.bump.outputs.should_release == 'true'
-        run: |
-          NEW_VERSION="${{ steps.bump.outputs.new_version }}"
-          jq ".version = \"$NEW_VERSION\"" extension/manifest.json > tmp.json
-          mv tmp.json extension/manifest.json
-          echo "Updated manifest.json to version $NEW_VERSION"
-
-      - name: Commit version bump
-        if: steps.bump.outputs.should_release == 'true'
-        run: |
-          NEW_VERSION="${{ steps.bump.outputs.new_version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add extension/manifest.json
-          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
-          git push
-
-      - name: Create Release
-        if: steps.bump.outputs.should_release == 'true'
+      - name: Create tag and release
+        if: steps.check.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="v${{ steps.bump.outputs.new_version }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="v$VERSION"
 
-          # Get commits for release notes
+          # Create and push tag
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+          # Get recent commits for release notes (from previous tag)
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
           if [ -n "$LAST_TAG" ]; then
-            NOTES=$(git log $LAST_TAG..HEAD~1 --pretty=format:"- %s" | head -30)
+            NOTES=$(git log $LAST_TAG..HEAD --pretty=format:"- %s" | grep -vE "^- chore:" | head -20)
           else
-            NOTES=$(git log --pretty=format:"- %s" -10)
+            NOTES=$(git log --pretty=format:"- %s" -10 | grep -vE "^- chore:")
           fi
 
-          # Check if release already exists
-          if gh release view "$VERSION" > /dev/null 2>&1; then
-            echo "Release $VERSION already exists, skipping"
-          else
-            gh release create "$VERSION" \
-              --title "$VERSION" \
-              --notes "## Changes
+          # Write release notes to temp file to avoid YAML parsing issues
+          cat > /tmp/release_notes.md << RNEOF
+          ## Changes
 
-          $NOTES"
-            echo "Created release $VERSION"
-          fi
+          ${NOTES}
+          RNEOF
+
+          # Create GitHub release
+          gh release create "$TAG" \
+            --title "Release $TAG" \
+            --notes-file /tmp/release_notes.md
+
+          echo "Created release $TAG"
 
   build-and-publish:
-    needs: version-and-release
-    if: needs.version-and-release.outputs.should_release == 'true'
+    needs: tag-and-release
+    if: needs.tag-and-release.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main  # Get the updated manifest
-
-      - name: Pull latest (with version bump)
-        run: git pull origin main
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -155,7 +97,7 @@ jobs:
 
       - name: Build extension zip
         run: |
-          VERSION="${{ needs.version-and-release.outputs.version }}"
+          VERSION="${{ needs.tag-and-release.outputs.version }}"
           cd extension
           zip -r ../patternpulse-v${VERSION}.zip . \
             -x "*.git*" -x "node_modules/*" -x "*.map"
@@ -163,7 +105,7 @@ jobs:
       - name: Upload to Chrome Web Store
         uses: mnao305/chrome-extension-upload@v5.0.0
         with:
-          file-path: patternpulse-v${{ needs.version-and-release.outputs.version }}.zip
+          file-path: patternpulse-v${{ needs.tag-and-release.outputs.version }}.zip
           extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
           client-id: ${{ secrets.CHROME_CLIENT_ID }}
           client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}

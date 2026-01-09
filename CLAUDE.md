@@ -38,8 +38,9 @@ patternpulse/
 │   ├── auditPatterns.js          # Check pattern assignments
 │   └── validateDb.js             # Database integrity checks
 └── .github/workflows/
-    ├── ci.yml                    # PR checks: branch name + tests
-    └── publish-extension.yml     # Auto-publish on version bump
+    ├── ci.yml                    # PR checks: branch name + tests + hotfix version
+    ├── publish-extension.yml     # Tag, release, publish to Chrome Store
+    └── promote-staging.yml       # Daily staging → main promotion
 ```
 
 ---
@@ -196,12 +197,12 @@ Version bumps are automatic based on commit message prefixes:
 
 ```
 feature/* ──PR──→ staging ──────────────→ main ──→ Chrome Store
-                     │                      │
-                     │                      ↓
-              (CI runs tests)    (Auto-version + Release)
-                     │                      │
-                     ↓                      ↓
-              Vercel Preview          Vercel Production
+                     │         │           │
+                     │         │           ↓
+              (CI: tests)  (bump version) (tag + release)
+                     │         │           │
+                     ↓         ↓           ↓
+              Vercel Preview  PR created  Vercel Production
 ```
 
 **Daily flow:**
@@ -209,17 +210,25 @@ feature/* ──PR──→ staging ──────────────�
 2. Make changes, commit with conventional commit format
 3. PR to staging → CI runs tests
 4. Merge to staging
-5. At 6pm EST (or manual trigger): staging → main
-6. Auto-version bump based on commits
-7. Release created, extension published
+5. At 6pm EST (or manual trigger):
+   - Version calculated from commits (highest bump type wins)
+   - manifest.json bumped on staging
+   - PR created: staging → main
+6. PR merged → tag created, release published, Chrome Store updated
+
+**Hotfix flow:**
+1. Create `hotfix/*` branch from main
+2. Make fix AND bump version in `extension/manifest.json` manually
+3. PR to main → CI validates version was bumped
+4. Merge → auto-publishes like normal release
 
 ### Workflows
 
 | File | Trigger | Purpose |
 |------|---------|---------|
-| `ci.yml` | PR to main/staging | Validate branch name, run tests |
-| `publish-extension.yml` | Push to main | Auto-version, release, publish |
-| `promote-staging.yml` | Daily 6pm EST / manual | PR staging → main |
+| `ci.yml` | PR to main/staging | Validate branch, run tests, check hotfix version |
+| `publish-extension.yml` | Push to main | Tag, release, publish (reads version from manifest) |
+| `promote-staging.yml` | Daily 6pm EST / manual | Bump version on staging, PR to main |
 
 ---
 
@@ -316,6 +325,9 @@ npm test -- --watch         # Watch mode
 - **Re-runs use original commit code** - Push fix to new branch, don't just re-run
 - **Release creation is idempotent** - Skips if tag already exists
 - **Chrome Store review** - First public publish needs manual approval
+- **Version bumped on staging** - Not main (main is protected, staging isn't)
+- **Hotfixes need manual version bump** - CI checks that hotfix PRs bump the version
+- **promote-staging calculates version** - From commits since last tag, highest bump wins
 
 ---
 

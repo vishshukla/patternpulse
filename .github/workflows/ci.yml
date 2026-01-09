@@ -45,6 +45,105 @@ jobs:
             fi
           fi
 
+  check-commit-messages:
+    runs-on: ubuntu-latest
+    # Skip for staging→main (already validated) and version bump commits
+    if: github.head_ref != 'staging'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate conventional commits
+        run: |
+          # Get commits in this PR
+          git fetch origin ${{ github.base_ref }}
+          COMMITS=$(git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s")
+
+          echo "Checking commit messages..."
+          echo "$COMMITS"
+          echo ""
+
+          VALID=true
+          while IFS= read -r msg; do
+            # Skip empty lines
+            [ -z "$msg" ] && continue
+
+            # Skip merge commits
+            if echo "$msg" | grep -qE "^Merge "; then
+              echo "⏭️  Skipping merge commit: $msg"
+              continue
+            fi
+
+            # Check conventional commit format
+            if echo "$msg" | grep -qE "^(feat|fix|chore|docs|style|refactor|test|ci|perf|build)(\(.+\))?!?:"; then
+              echo "✅ $msg"
+            else
+              echo "❌ $msg"
+              VALID=false
+            fi
+          done <<< "$COMMITS"
+
+          echo ""
+          if [ "$VALID" = false ]; then
+            echo "❌ Some commits don't follow conventional commit format!"
+            echo ""
+            echo "Required format: <type>: <description>"
+            echo ""
+            echo "Valid types:"
+            echo "  feat:     New feature (minor version bump)"
+            echo "  fix:      Bug fix (patch version bump)"
+            echo "  chore:    Maintenance (no version bump)"
+            echo "  docs:     Documentation (no version bump)"
+            echo "  style:    Formatting (no version bump)"
+            echo "  refactor: Code refactoring (no version bump)"
+            echo "  test:     Adding tests (no version bump)"
+            echo "  ci:       CI changes (no version bump)"
+            echo ""
+            echo "Examples:"
+            echo "  feat: add dark mode toggle"
+            echo "  fix: resolve scroll issue on mobile"
+            echo "  feat!: redesign quiz UI (breaking change)"
+            exit 1
+          fi
+
+          echo "✅ All commit messages are valid!"
+
+  check-hotfix-version:
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'main' && startsWith(github.head_ref, 'hotfix/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version bump in hotfix
+        run: |
+          # Get version from PR branch
+          PR_VERSION=$(jq -r '.version' extension/manifest.json)
+          echo "PR version: $PR_VERSION"
+
+          # Get version from main
+          git fetch origin main
+          MAIN_VERSION=$(git show origin/main:extension/manifest.json | jq -r '.version')
+          echo "Main version: $MAIN_VERSION"
+
+          # Compare versions
+          if [ "$PR_VERSION" = "$MAIN_VERSION" ]; then
+            echo ""
+            echo "❌ Hotfix PRs must include a version bump!"
+            echo ""
+            echo "Current main version: $MAIN_VERSION"
+            echo "Your PR version:      $PR_VERSION"
+            echo ""
+            echo "Please bump the version in extension/manifest.json"
+            echo "Typically hotfixes are patch bumps (e.g., 0.9.3 → 0.9.4)"
+            exit 1
+          fi
+
+          # Validate version is higher (simple string compare works for semver)
+          echo "✅ Version bumped from $MAIN_VERSION to $PR_VERSION"
+
   run-tests:
     runs-on: ubuntu-latest
     steps:

@@ -17,14 +17,92 @@ jobs:
         with:
           ref: staging
           fetch-depth: 0
+          token: ${{ secrets.STAGING_PAT }}
 
       - name: Check if staging has new commits
         id: check
         run: |
-          git fetch origin main
+          git fetch origin main --tags
           DIFF=$(git rev-list --count origin/main..staging)
           echo "Staging is $DIFF commits ahead of main"
           echo "commits_ahead=$DIFF" >> $GITHUB_OUTPUT
+
+      - name: Calculate version bump from commits
+        id: version
+        if: steps.check.outputs.commits_ahead > 0
+        run: |
+          # Get last release tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Last tag: $LAST_TAG"
+
+          # Get commits on staging since main (these are the commits being promoted)
+          COMMITS=$(git log origin/main..staging --pretty=format:"%s")
+          echo "Commits to be promoted:"
+          echo "$COMMITS"
+
+          # Skip if only chore/docs commits
+          NON_CHORE=$(echo "$COMMITS" | grep -vE "^(chore|docs|ci|style|refactor)(\(.+\))?:" || true)
+          if [ -z "$NON_CHORE" ]; then
+            echo "Only chore/docs commits. Skipping version bump."
+            echo "should_bump=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Determine bump type from conventional commits
+          BUMP="patch"  # Default
+
+          if echo "$COMMITS" | grep -qE "^feat(\(.+\))?!:|BREAKING CHANGE:"; then
+            BUMP="major"
+            echo "Found breaking change - major bump"
+          elif echo "$COMMITS" | grep -qE "^feat(\(.+\))?:"; then
+            BUMP="minor"
+            echo "Found feat commit - minor bump"
+          else
+            echo "Default to patch bump"
+          fi
+
+          # Get current version from manifest (or from last tag)
+          CURRENT=$(jq -r '.version' extension/manifest.json)
+          echo "Current manifest version: $CURRENT"
+
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          # Calculate new version
+          case $BUMP in
+            major)
+              NEW_VERSION="$((MAJOR + 1)).0.0"
+              ;;
+            minor)
+              NEW_VERSION="$MAJOR.$((MINOR + 1)).0"
+              ;;
+            patch)
+              NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+              ;;
+          esac
+
+          echo "New version: $NEW_VERSION (bump type: $BUMP)"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "bump_type=$BUMP" >> $GITHUB_OUTPUT
+          echo "should_bump=true" >> $GITHUB_OUTPUT
+
+      - name: Bump version on staging
+        if: steps.check.outputs.commits_ahead > 0 && steps.version.outputs.should_bump == 'true'
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+
+          # Update manifest.json
+          jq ".version = \"$NEW_VERSION\"" extension/manifest.json > tmp.json
+          mv tmp.json extension/manifest.json
+
+          # Commit and push to staging (staging is not protected)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add extension/manifest.json
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+          git push origin staging
+
+          echo "Bumped version to $NEW_VERSION on staging"
 
       - name: Check for existing PR
         id: existing_pr
@@ -39,21 +117,29 @@ jobs:
         if: steps.check.outputs.commits_ahead > 0 && steps.existing_pr.outputs.existing_pr == ''
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.new_version }}
+          BUMP_TYPE: ${{ steps.version.outputs.bump_type }}
         run: |
-          # Get commit messages for PR body
           COMMITS=$(git log origin/main..staging --pretty=format:"- %s" | head -20)
+
+          # Write body to temp file to avoid YAML parsing issues with colons
+          cat > /tmp/pr_body.md << PREOF
+          ## Automated promotion of staging changes
+
+          **Version:** v${VERSION} (${BUMP_TYPE} bump)
+
+          **Commits included**
+          ${COMMITS}
+
+          ---
+          *This PR was created automatically by the promote-staging workflow.*
+          PREOF
 
           gh pr create \
             --base main \
             --head staging \
-            --title "Release: Promote staging to main" \
-            --body "## Automated promotion of staging changes
-
-          ### Commits included:
-          $COMMITS
-
-          ---
-          *This PR was created automatically by the promote-staging workflow.*"
+            --title "Release v${VERSION}: Promote staging to main" \
+            --body-file /tmp/pr_body.md
 
       - name: Enable auto-merge
         if: steps.check.outputs.commits_ahead > 0
@@ -69,6 +155,8 @@ jobs:
         run: |
           if [ "${{ steps.check.outputs.commits_ahead }}" = "0" ]; then
             echo "✅ Staging is up to date with main. Nothing to promote."
+          elif [ "${{ steps.version.outputs.should_bump }}" = "false" ]; then
+            echo "✅ Only chore/docs commits. PR created without version bump."
           else
-            echo "✅ Created/updated PR to promote staging to main."
+            echo "✅ Bumped to v${{ steps.version.outputs.new_version }} and created PR to main."
           fi
