@@ -56,11 +56,12 @@ jobs:
           git push origin "$TAG"
 
           # Get recent commits for release notes (from previous tag)
+          # Filter out: merge commits, chore, docs, ci, style, refactor
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
           if [ -n "$LAST_TAG" ]; then
-            NOTES=$(git log $LAST_TAG..HEAD --pretty=format:"- %s" | grep -vE "^- chore:" | head -20)
+            NOTES=$(git log $LAST_TAG..HEAD --pretty=format:"- %s" | grep -vE "^- (Merge|chore|docs|ci|style|refactor)" | head -20)
           else
-            NOTES=$(git log --pretty=format:"- %s" -10 | grep -vE "^- chore:")
+            NOTES=$(git log --pretty=format:"- %s" -10 | grep -vE "^- (Merge|chore|docs|ci|style|refactor)")
           fi
 
           # Write release notes to temp file to avoid YAML parsing issues
