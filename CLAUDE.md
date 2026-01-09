@@ -183,15 +183,32 @@ gh pr create --base staging --title "feat: add new feature" --body "Description"
 
 ### Conventional Commits (Auto-Versioning)
 
-Version bumps are automatic based on commit message prefixes:
+Version bumps are automatic based on commit message prefixes.
+
+**CI enforces conventional commit format** - PRs with invalid messages will be rejected.
 
 | Prefix | Version Bump | Example |
 |--------|--------------|---------|
 | `fix:` | Patch (0.0.X) | `fix: resolve scroll issue` |
 | `feat:` | Minor (0.X.0) | `feat: add dark mode` |
 | `feat!:` | Major (X.0.0) | `feat!: redesign entire UI` |
-| `chore:` | No bump | `chore: update docs` |
+| `chore:` | No bump | `chore: update deps` |
 | `docs:` | No bump | `docs: fix typo in README` |
+| `ci:` | No bump | `ci: update workflow` |
+| `style:` | No bump | `style: format code` |
+| `refactor:` | No bump | `refactor: extract helper` |
+| `test:` | No bump | `test: add unit tests` |
+
+### Landing Page Changes
+
+Use `(landing)` scope for landing page changes - **these don't trigger Chrome extension releases**:
+
+| Commit | Version Bump | Releases Extension? |
+|--------|--------------|---------------------|
+| `feat(landing): redesign hero` | None | No |
+| `fix(landing): mobile layout` | None | No |
+| `feat: add dark mode` | Minor | Yes |
+| `fix: resolve quiz crash` | Patch | Yes |
 
 ### CI/CD Pipeline
 
@@ -221,14 +238,35 @@ feature/* ──PR──→ staging ──────────────�
 2. Make fix AND bump version in `extension/manifest.json` manually
 3. PR to main → CI validates version was bumped
 4. Merge → auto-publishes like normal release
+5. After hotfix: sync staging with `git checkout staging && git merge main && git push`
+
+**Manual promotion (don't want to wait for 6pm):**
+1. Go to: Actions → "Promote Staging to Main"
+2. Click "Run workflow" → Select branch: `staging` → Run
+3. Same process as daily, just triggered manually
 
 ### Workflows
 
 | File | Trigger | Purpose |
 |------|---------|---------|
-| `ci.yml` | PR to main/staging | Validate branch, run tests, check hotfix version |
+| `ci.yml` | PR to main/staging | Validate branch, lint commits, run tests, check hotfix version |
 | `publish-extension.yml` | Push to main | Tag, release, publish (reads version from manifest) |
 | `promote-staging.yml` | Daily 6pm EST / manual | Bump version on staging, PR to main |
+
+**CI checks (`ci.yml`):**
+- `check-branch-name` - Validates branch naming (feature/*, fix/* → staging; staging, hotfix/* → main)
+- `check-commit-messages` - Enforces conventional commit format (skipped for staging → main)
+- `check-hotfix-version` - Ensures hotfix PRs include manual version bump
+- `run-tests` - Runs `npm test`
+
+**Secrets required:**
+| Secret | Purpose |
+|--------|---------|
+| `CHROME_EXTENSION_ID` | Chrome Web Store extension ID |
+| `CHROME_CLIENT_ID` | OAuth client ID |
+| `CHROME_CLIENT_SECRET` | OAuth client secret |
+| `CHROME_REFRESH_TOKEN` | OAuth refresh token |
+| `STAGING_PAT` | Personal Access Token for pushing to staging (bypasses branch protection) |
 
 ---
 
@@ -325,9 +363,12 @@ npm test -- --watch         # Watch mode
 - **Re-runs use original commit code** - Push fix to new branch, don't just re-run
 - **Release creation is idempotent** - Skips if tag already exists
 - **Chrome Store review** - First public publish needs manual approval
-- **Version bumped on staging** - Not main (main is protected, staging isn't)
+- **Version bumped on staging** - Uses STAGING_PAT to bypass branch protection
 - **Hotfixes need manual version bump** - CI checks that hotfix PRs bump the version
 - **promote-staging calculates version** - From commits since last tag, highest bump wins
+- **`[skip ci]` hangs required checks** - Never use in commits that will be in PRs
+- **STAGING_PAT expires** - Fine-grained PAT needs rotation (check expiration date)
+- **Landing page changes use `(landing)` scope** - Won't trigger extension release
 
 ---
 
