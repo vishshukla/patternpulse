@@ -40,6 +40,17 @@ jobs:
           echo "Commits to be promoted:"
           echo "$COMMITS"
 
+          # Check if any extension files actually changed
+          EXTENSION_FILES=$(git diff --name-only origin/main..staging -- extension/ || true)
+          echo "Extension files changed:"
+          echo "$EXTENSION_FILES"
+
+          if [ -z "$EXTENSION_FILES" ]; then
+            echo "No extension files changed. Skipping version bump."
+            echo "should_bump=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           # Filter out non-extension commits (chore, docs, landing page changes)
           # These don't trigger version bumps
           EXTENSION_COMMITS=$(echo "$COMMITS" | grep -vE "^(chore|docs|ci|style|refactor)(\(.+\))?:" | grep -vE "^(feat|fix)\(landing\):" || true)

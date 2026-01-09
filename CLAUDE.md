@@ -366,6 +366,7 @@ npm test -- --watch         # Watch mode
 - **Version bumped on staging** - Uses STAGING_PAT to bypass branch protection
 - **Hotfixes need manual version bump** - CI checks that hotfix PRs bump the version
 - **promote-staging calculates version** - From commits since last tag, highest bump wins
+- **Only extension/ changes trigger release** - Changes to README, tests, scripts alone won't publish
 - **`[skip ci]` hangs required checks** - Never use in commits that will be in PRs
 - **STAGING_PAT expires** - Fine-grained PAT needs rotation (check expiration date)
 - **Landing page changes use `(landing)` scope** - Won't trigger extension release
