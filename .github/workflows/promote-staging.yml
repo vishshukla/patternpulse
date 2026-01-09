@@ -17,7 +17,7 @@ jobs:
         with:
           ref: staging
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.STAGING_PAT }}
 
       - name: Check if staging has new commits
         id: check
