@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PatternPulse - LeetCode Pattern Trainer",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Train your pattern recognition! Quiz yourself on algorithmic patterns before seeing LeetCode hints, tags, and solutions.",
   "icons": {
     "16": "icons/icon-16.png",
