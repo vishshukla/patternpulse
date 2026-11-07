@@ -40,21 +40,39 @@ jobs:
           echo "Commits to be promoted:"
           echo "$COMMITS"
 
-          # Skip if only chore/docs commits
-          NON_CHORE=$(echo "$COMMITS" | grep -vE "^(chore|docs|ci|style|refactor)(\(.+\))?:" || true)
-          if [ -z "$NON_CHORE" ]; then
-            echo "Only chore/docs commits. Skipping version bump."
+          # Check if any extension files actually changed
+          EXTENSION_FILES=$(git diff --name-only origin/main..staging -- extension/ || true)
+          echo "Extension files changed:"
+          echo "$EXTENSION_FILES"
+
+          if [ -z "$EXTENSION_FILES" ]; then
+            echo "No extension files changed. Skipping version bump."
             echo "should_bump=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Determine bump type from conventional commits
+          # Filter out non-extension commits (chore, docs, landing page changes)
+          # These don't trigger version bumps
+          EXTENSION_COMMITS=$(echo "$COMMITS" | grep -vE "^(chore|docs|ci|style|refactor)(\(.+\))?:" | grep -vE "^(feat|fix)\(landing\):" || true)
+
+          if [ -z "$EXTENSION_COMMITS" ]; then
+            echo "Only chore/docs/landing commits. Skipping version bump."
+            echo "should_bump=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Extension-relevant commits:"
+          echo "$EXTENSION_COMMITS"
+
+          # Determine bump type from extension commits only
           BUMP="patch"  # Default
 
-          if echo "$COMMITS" | grep -qE "^feat(\(.+\))?!:|BREAKING CHANGE:"; then
+          # Check for breaking changes (exclude landing scope)
+          if echo "$EXTENSION_COMMITS" | grep -qE "^feat(\([^)]*\))?!:|BREAKING CHANGE:"; then
             BUMP="major"
             echo "Found breaking change - major bump"
-          elif echo "$COMMITS" | grep -qE "^feat(\(.+\))?:"; then
+          # Check for features (exclude landing scope)
+          elif echo "$EXTENSION_COMMITS" | grep -qE "^feat(\([^)]*\))?:"; then
             BUMP="minor"
             echo "Found feat commit - minor bump"
           else
@@ -99,7 +117,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add extension/manifest.json
-          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+          git commit -m "chore: bump version to $NEW_VERSION"
           git push origin staging
 
           echo "Bumped version to $NEW_VERSION on staging"
