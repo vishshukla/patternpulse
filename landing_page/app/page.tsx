@@ -1,44 +1,13 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { BarChart3, Chrome, Sparkles, Target, Brain, Mail, CheckCircle, Loader2 } from 'lucide-react'
+import { BarChart3, Chrome, Sparkles, Target, Brain, Shield, Zap } from 'lucide-react'
 import { useState } from 'react'
 
-// TODO: Replace with your actual Chrome Web Store URL after publishing
-const CHROME_STORE_URL = 'https://chrome.google.com/webstore/detail/patternpulse/YOUR_EXTENSION_ID'
-
-// Google Form configuration
-const GOOGLE_FORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLScSMueGAnRqxrQuC9ziNgi72TlOM8uh-fSYVZS0J2SFw12q1A/formResponse'
-const GOOGLE_FORM_EMAIL_ENTRY = 'entry.1669615047'
+const CHROME_STORE_URL = 'https://chromewebstore.google.com/detail/patternpulse-leetcode-pat/mnfiladjdapefilfdimnombhfanpmepg'
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [email, setEmail] = useState('')
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email || submitStatus === 'loading') return
-
-    setSubmitStatus('loading')
-
-    try {
-      // Submit to Google Form
-      const formData = new FormData()
-      formData.append(GOOGLE_FORM_EMAIL_ENTRY, email)
-
-      await fetch(GOOGLE_FORM_ACTION, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
-      })
-
-      setSubmitStatus('success')
-      setEmail('')
-    } catch (error) {
-      setSubmitStatus('error')
-    }
-  }
 
   const faqs = [
     {
@@ -47,7 +16,7 @@ export default function Home() {
     },
     {
       q: 'What problems are covered?',
-      a: 'LeetCode\'s first 100 problems, NeetCode 150, and LeetCode 75. We\'re continuously adding more based on feedback.'
+      a: 'Currently 256 problems including NeetCode 150, LeetCode 75, and the first 100 LeetCode problems. We\'re actively adding more every week — the goal is full LeetCode coverage.'
     },
     {
       q: 'How do the AI hints work?',
@@ -78,10 +47,10 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-electric-purple/10 border border-electric-purple/30 rounded-full text-electric-purple text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-sm font-medium mb-6"
             >
-              <Chrome className="w-4 h-4" />
-              <span>Launching Soon — 100% Free</span>
+              <Zap className="w-4 h-4" />
+              <span>Free Chrome Extension</span>
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight">
@@ -96,56 +65,36 @@ export default function Home() {
               Stop memorizing solutions. Learn to identify the right approach <em>before</em> you start coding — just like in real interviews.
             </p>
 
-            {/* Email Signup Form */}
-            <div className="max-w-md mx-auto mb-6">
-              {submitStatus === 'success' ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center justify-center gap-2 py-4 px-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  <span>You're on the list! We'll email you when it's live.</span>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="w-full pl-12 pr-4 py-4 bg-gray-900/80 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-purple transition-colors"
-                    />
-                  </div>
-                  <motion.button
-                    type="submit"
-                    disabled={submitStatus === 'loading'}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-6 py-4 bg-electric-purple hover:bg-primary-hover disabled:opacity-50 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"
-                  >
-                    {submitStatus === 'loading' ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        <Chrome className="w-5 h-5" />
-                        Get Early Access
-                      </>
-                    )}
-                  </motion.button>
-                </form>
-              )}
-              {submitStatus === 'error' && (
-                <p className="text-red-400 text-sm mt-2 text-center">Something went wrong. Please try again.</p>
-              )}
+            {/* Primary CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+              <motion.a
+                href={CHROME_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 bg-electric-purple hover:bg-primary-hover text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-3 text-lg shadow-lg shadow-electric-purple/25"
+              >
+                <Chrome className="w-6 h-6" />
+                Add to Chrome — Free
+              </motion.a>
             </div>
 
-            <p className="text-sm text-gray-500">
-              <span className="text-emerald-400">100% free</span> — Supports <span className="text-gray-400">NeetCode 150</span> and <span className="text-gray-400">LeetCode 75</span> with AI-powered hints
-            </p>
+            {/* Trust signals */}
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-emerald-400" />
+                <span>No account required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-emerald-400" />
+                <span>Works instantly</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400">256+</span>
+                <span>problems & growing</span>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -288,9 +237,9 @@ export default function Home() {
                 <div className="w-8 h-8 bg-electric-purple/10 rounded-lg flex items-center justify-center text-electric-purple">
                   <Target className="w-4 h-4" />
                 </div>
-                <h3 className="text-base font-semibold text-white">Popular Problem Lists</h3>
+                <h3 className="text-base font-semibold text-white">256+ Problems & Growing</h3>
               </div>
-              <p className="text-sm text-gray-500">NeetCode 150, LeetCode 75, and the first 100 LeetCode problems. Continuously adding more.</p>
+              <p className="text-sm text-gray-500">NeetCode 150, LeetCode 75, and more. New problems added weekly — working toward full LeetCode coverage.</p>
             </motion.div>
 
             <motion.div
@@ -373,7 +322,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Email CTA Section */}
+      {/* Bottom CTA Section */}
       <section className="py-16 md:py-20 border-t border-slate-800 bg-gradient-to-b from-gray-900/30 to-transparent">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -388,45 +337,23 @@ export default function Home() {
             </h2>
 
             <p className="text-gray-500 mb-6">
-              Get notified when PatternPulse launches. It's completely free.
+              Start training your pattern recognition today. It takes 10 seconds to install.
             </p>
 
-            {submitStatus === 'success' ? (
-              <div className="flex items-center justify-center gap-2 py-4 px-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400">
-                <CheckCircle className="w-5 h-5" />
-                <span>You're on the list!</span>
-              </div>
-            ) : (
-              <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-1 relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-gray-900/80 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-electric-purple transition-colors"
-                  />
-                </div>
-                <motion.button
-                  type="submit"
-                  disabled={submitStatus === 'loading'}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-6 py-4 bg-electric-purple hover:bg-primary-hover disabled:opacity-50 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"
-                >
-                  {submitStatus === 'loading' ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    'Notify Me'
-                  )}
-                </motion.button>
-              </form>
-            )}
+            <motion.a
+              href={CHROME_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-electric-purple hover:bg-primary-hover text-white font-semibold rounded-xl transition-all text-lg shadow-lg shadow-electric-purple/25"
+            >
+              <Chrome className="w-6 h-6" />
+              Add to Chrome — Free
+            </motion.a>
 
             <p className="text-xs text-gray-600 mt-4">
-              Works on any Chromium browser (Chrome, Edge, Brave, Arc)
+              Works on Chrome, Edge, Brave, Arc, and any Chromium browser
             </p>
           </motion.div>
         </div>
